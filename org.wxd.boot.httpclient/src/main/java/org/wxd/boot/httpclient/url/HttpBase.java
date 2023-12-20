@@ -261,9 +261,9 @@ public abstract class HttpBase<H extends HttpBase> {
     }
 
     /** 设置重试次数 */
-    public H reTry(int reTry) {
-        if (reTry < 1) throw new RuntimeException("重试次数最少是1");
-        this.retry = reTry;
+    public H retry(int retry) {
+        if (retry < 1) throw new RuntimeException("重试次数最少是1");
+        this.retry = retry;
         return (H) this;
     }
 
