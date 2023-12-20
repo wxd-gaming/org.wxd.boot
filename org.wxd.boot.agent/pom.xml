@@ -59,11 +59,11 @@
                         </goals>
                         <configuration>
                             <target>
-                                <!--                                <copy todir="${basedir}/../lib" overwrite="true">-->
-                                <!--                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">-->
-                                <!--                                        <include name="*.jar"/>-->
-                                <!--                                    </fileset>-->
-                                <!--                                </copy>-->
+                                <copy todir="${basedir}/../target/libs" overwrite="true">
+                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">
+                                        <include name="*.jar"/>
+                                    </fileset>
+                                </copy>
                             </target>
                         </configuration>
                     </execution>

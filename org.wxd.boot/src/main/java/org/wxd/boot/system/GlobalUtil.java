@@ -26,4 +26,7 @@ public class GlobalUtil {
         }
     }
 
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> SHUTTING.set(true)));
+    }
 }
