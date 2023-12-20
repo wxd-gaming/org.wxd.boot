@@ -6,7 +6,7 @@
 
     <groupId>org.wxd</groupId>
     <artifactId>org.wxd</artifactId>
-    <version>wxd-j21-01</version>
+    <version>wxd-j17-01</version>
     <packaging>pom</packaging>
     <modules>
         <module>org.wxd.boot</module>
@@ -25,7 +25,7 @@
 
     <properties>
         <encoding>UTF-8</encoding>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
         <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
         <maven.compiler.encoding>${encoding}</maven.compiler.encoding>
