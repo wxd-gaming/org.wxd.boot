@@ -64,17 +64,17 @@ public final class Response<H extends HttpBase> {
         return StringUtil.unicodeDecode(bodyString());
     }
 
-    public Response logDebug() {
+    public Response<H> logDebug() {
         log.debug("res: {} {}", bodyString(), this.toString());
         return this;
     }
 
-    public Response logInfo() {
+    public Response<H> logInfo() {
         log.info("res: {} {}", bodyString(), this.toString());
         return this;
     }
 
-    public Response systemOut() {
+    public Response<H> systemOut() {
         System.out.println("res: " + bodyString() + " " + this.toString());
         return this;
     }

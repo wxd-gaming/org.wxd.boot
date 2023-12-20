@@ -21,15 +21,15 @@ import java.util.Optional;
  **/
 @Slf4j
 @Getter
-public final class Response<T extends HttpBase> {
+public final class Response<H extends HttpBase> {
 
-    final T httpBase;
+    final H httpBase;
     final String uriPath;
     String postText = null;
     StackTraceElement[] threadStackTrace = null;
     HttpResponse<byte[]> httpResponse;
 
-    Response(T httpBase, String uriPath) {
+    Response(H httpBase, String uriPath) {
         this.httpBase = httpBase;
         this.uriPath = uriPath;
     }
@@ -66,17 +66,17 @@ public final class Response<T extends HttpBase> {
         return StringUtil.unicodeDecode(bodyString());
     }
 
-    public Response logDebug() {
+    public Response<H> logDebug() {
         log.debug("res: {} {}", bodyString(), this.toString());
         return this;
     }
 
-    public Response logInfo() {
+    public Response<H> logInfo() {
         log.info("res: {} {}", bodyString(), this.toString());
         return this;
     }
 
-    public Response systemOut() {
+    public Response<H> systemOut() {
         System.out.println("res: " + bodyString() + " " + this.toString());
         return this;
     }
