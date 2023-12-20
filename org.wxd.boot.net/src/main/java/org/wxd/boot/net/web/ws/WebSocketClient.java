@@ -265,22 +265,18 @@ public class WebSocketClient<S extends WebSession> extends NioClient<S> {
             } else {
                 if (msg instanceof WebSocketFrame frame) {
                     try {
-                        switch (frame) {
-                            case TextWebSocketFrame textFrame -> {
-                                session.checkReadTime();
-                                if (WebSocketClient.this.onStringMessage != null) {
-                                    WebSocketClient.this.onStringMessage.accept(session, textFrame.text());
-                                } else {
-                                    log.debug("当前不接受文本消息：{}, {}", session, textFrame.text());
-                                }
+                        if (frame instanceof TextWebSocketFrame textFrame) {
+                            session.checkReadTime();
+                            if (WebSocketClient.this.onStringMessage != null) {
+                                WebSocketClient.this.onStringMessage.accept(session, textFrame.text());
+                            } else {
+                                log.debug("当前不接受文本消息：{}, {}", session, textFrame.text());
                             }
-                            case BinaryWebSocketFrame binaryFrame -> {
-                                ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryFrame.content());
-                                read(WebSocketClient.this, session, byteBuf);
-                            }
-                            case CloseWebSocketFrame closeWebSocketFrame -> session.disConnect("CloseWebSocketFrame");
-                            default -> {
-                            }
+                        } else if (frame instanceof BinaryWebSocketFrame binaryFrame) {
+                            ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryFrame.content());
+                            read(WebSocketClient.this, session, byteBuf);
+                        } else if (frame instanceof CloseWebSocketFrame) {
+                            session.disConnect("CloseWebSocketFrame");
                         }
                     } catch (Throwable e) {
                         log.warn("处理消息异常", e);

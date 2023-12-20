@@ -234,32 +234,27 @@ public class WebSocketServer<S extends WebSession> extends SocketServer<S> {
 
         protected void handlerWebSocketFrame(S session, WebSocketFrame frame) {
             try {
-                switch (frame) {
-                    case CloseWebSocketFrame closeWebSocketFrame ->
+                if (frame instanceof CloseWebSocketFrame closeWebSocketFrame) {
+                    handshaker.close(session.getChannelContext().channel(), closeWebSocketFrame.retain());
+                } else if (frame instanceof
                         /*判断是否关闭链路的指令*/
-                            handshaker.close(session.getChannelContext().channel(), closeWebSocketFrame.retain());
-                    case PingWebSocketFrame pingWebSocketFrame ->
+                        PingWebSocketFrame) {
+                    session.getChannelContext().channel().write(new PongWebSocketFrame(frame.content().retain()));
+                } else if (frame instanceof
                         /*判断是否ping消息*/
-                            session.getChannelContext().channel().write(new PongWebSocketFrame(frame.content().retain()));
-                    case BinaryWebSocketFrame binaryWebSocketFrame -> {
-                        /*二进制数据*/
-                        ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryWebSocketFrame.content());
-                        read(WebSocketServer.this, session, byteBuf);
-                        session.checkReadCount(WebSocketServer.this.maxReadCount);
-                    }
-                    case TextWebSocketFrame textWebSocketFrame -> {
-                        /*文本数据*/
-                        String request = textWebSocketFrame.text();
-                        session.checkReadTime();
-                        session.addReadCount();
-                        session.checkReadCount(WebSocketServer.this.maxReadCount);
-                        if (WebSocketServer.this.onStringMessage != null) {
-                            WebSocketServer.this.onStringMessage.accept(session, request);
-                        } else {
-                            log.debug("当前不接受文本消息：{}, {}", session, request);
-                        }
-                    }
-                    case null, default -> {
+                        BinaryWebSocketFrame binaryWebSocketFrame) {/*二进制数据*/
+                    ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryWebSocketFrame.content());
+                    read(WebSocketServer.this, session, byteBuf);
+                    session.checkReadCount(WebSocketServer.this.maxReadCount);
+                } else if (frame instanceof TextWebSocketFrame textWebSocketFrame) {/*文本数据*/
+                    String request = textWebSocketFrame.text();
+                    session.checkReadTime();
+                    session.addReadCount();
+                    session.checkReadCount(WebSocketServer.this.maxReadCount);
+                    if (WebSocketServer.this.onStringMessage != null) {
+                        WebSocketServer.this.onStringMessage.accept(session, request);
+                    } else {
+                        log.debug("当前不接受文本消息：{}, {}", session, request);
                     }
                 }
             } catch (Throwable e) {

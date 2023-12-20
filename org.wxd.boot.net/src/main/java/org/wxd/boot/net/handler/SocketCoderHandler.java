@@ -280,7 +280,7 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
             if (StringUtil.notEmptyOrNull(async.threadName())) {
                 executorServices = Executors.All_THREAD_LOCAL.get(async.threadName());
             } else if (async.vt()) {
-                executorServices = Executors.getVTExecutor();
+                executorServices = Executors.getLogicExecutor();
             }
             queueName = async.queueName();
         }

@@ -46,7 +46,7 @@ public class SqlBatchPool extends BatchPool {
     public int exec(String tableName, List<DataBuilder> values) throws Exception {
         int i = 0;
         if (values != null && !values.isEmpty()) {
-            final DataBuilder dbBase = values.getFirst();
+            final DataBuilder dbBase = values.get(0);
             final SqlEntityTable entityTable = (SqlEntityTable) dbBase.getEntityTable();
             String sqlStr = entityTable.getReplaceSql(dbBase.getData());
             try (Connection connection = dataHelper.getConnection()) {

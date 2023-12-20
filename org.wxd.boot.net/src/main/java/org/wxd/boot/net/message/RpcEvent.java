@@ -76,7 +76,7 @@ public class RpcEvent {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         threadStackTrace = new StackTraceElement[stackTrace.length - 2];
         System.arraycopy(stackTrace, 2, threadStackTrace, 0, threadStackTrace.length);
-        return Executors.getVTExecutor().completable(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             this.get();
             return RpcEvent.this;
         });

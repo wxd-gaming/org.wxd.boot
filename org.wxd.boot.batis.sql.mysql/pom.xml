@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wxd</groupId>
         <artifactId>org.wxd</artifactId>
-        <version>wxd-j21-01</version>
+        <version>wxd-j17-01</version>
     </parent>
 
     <artifactId>org.wxd.boot.batis.sql.mysql</artifactId>

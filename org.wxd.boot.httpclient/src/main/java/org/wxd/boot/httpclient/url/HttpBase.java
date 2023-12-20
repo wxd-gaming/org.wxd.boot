@@ -161,7 +161,7 @@ public abstract class HttpBase<H extends HttpBase> {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         response.threadStackTrace = new StackTraceElement[stackTrace.length - 1];
         System.arraycopy(stackTrace, 1, response.threadStackTrace, 0, response.threadStackTrace.length);
-        return Executors.getVTExecutor().completable(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             this.request();
             return response;
         });

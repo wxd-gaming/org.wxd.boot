@@ -79,7 +79,7 @@ public abstract class EventRunnable implements Runnable {
         if (StringUtil.notEmptyOrNull(getThreadName())) {
             executor = Executors.All_THREAD_LOCAL.get(getThreadName());
         } else if (isVt()) {
-            executor = Executors.getVTExecutor();
+            executor = Executors.getLogicExecutor();
         } else {
             executor = Executors.getLogicExecutor();
         }

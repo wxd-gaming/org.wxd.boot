@@ -35,17 +35,17 @@ public class MongoQueryBuilder extends QueryBuilder implements Serializable {
             final Document projectDocument = new Document();
             for (Map.Entry<String, QueryEnum> entry : this.selectMap.entrySet()) {
                 switch (entry.getValue()) {
-                    case QueryEnum.Sum: {
+                    case Sum: {
                         projectDocument.append(entry.getKey(), new Document("$sum", "$" + entry.getKey()));
                     }
                     break;
-                    case QueryEnum.Count: {
+                    case Count: {
                         throw new RuntimeException("未实现 count 算法");
                     }
-                    case QueryEnum.Max: {
+                    case Max: {
                         throw new RuntimeException("未实现 Max 算法");
                     }
-                    case QueryEnum.Min: {
+                    case Min: {
                         throw new RuntimeException("未实现 Min 算法");
                     }
                     default:
@@ -68,20 +68,20 @@ public class MongoQueryBuilder extends QueryBuilder implements Serializable {
                     final WhereEnum whereEnum = tuple4.getE3();
                     final Object[] args = tuple4.getE4();
                     switch (whereEnum) {
-                        case WhereEnum.None:
+                        case None:
                             whereDocument.append(columnName, args[0]);
                             break;
-                        case WhereEnum.Gte: {
+                        case Gte: {
                             Document document = new Document("$gte", args[0]);
                             whereDocument.append(columnName, document);
                         }
                         break;
-                        case WhereEnum.Lte: {
+                        case Lte: {
                             Document document = new Document("$lte", args[0]);
                             whereDocument.append(columnName, document);
                         }
                         break;
-                        case WhereEnum.GteAndLte: {
+                        case GteAndLte: {
                             Document document = new Document()
                                     .append("$gte", args[0])
                                     .append("$lte", args[1]);
