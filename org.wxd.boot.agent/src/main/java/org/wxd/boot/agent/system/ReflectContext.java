@@ -152,6 +152,10 @@ public class ReflectContext {
 
         private final Class<?> cls;
 
+        public static Content of(Class<?> cls) {
+            return new Content(cls);
+        }
+
         Content(Class<?> cls) {
             this.cls = cls;
         }

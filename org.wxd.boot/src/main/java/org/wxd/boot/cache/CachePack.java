@@ -3,8 +3,7 @@ package org.wxd.boot.cache;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.agent.function.ConsumerE2;
 import org.wxd.boot.collection.concurrent.ConcurrentList;
 import org.wxd.boot.threading.EventRunnable;
@@ -22,13 +21,11 @@ import java.util.function.Function;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2021-11-22 09:24
  **/
+@Slf4j
 @Getter
 @Setter
 @Accessors(chain = true)
 public class CachePack<K, V> implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    private static final Logger log = LoggerFactory.getLogger(CachePack.class);
 
     private static final ConcurrentList<CachePack> CACHE_PACKS = new ConcurrentList<>();
 
@@ -110,35 +107,21 @@ public class CachePack<K, V> implements Serializable {
     }
 
     private String cacheName;
-    /**
-     * cache的心跳执行, 单位毫秒
-     */
+    /** cache的心跳执行, 单位毫秒 */
     protected volatile long cacheIntervalTime = 0;
-    /**
-     * 最后一次执行心跳时间, 单位毫秒
-     */
+    /** 最后一次执行心跳时间, 单位毫秒 */
     protected volatile long lastCacheIntervalTime = 0;
-    /**
-     * 默认缓存策略, true 滑动缓存
-     */
+    /** 默认缓存策略, true 滑动缓存 */
     protected volatile boolean cacheSlide = true;
-    /**
-     * 默认清理时间 , 单位毫秒
-     */
+    /** 默认清理时间 , 单位毫秒 */
     protected volatile long cacheSurvivalTime = -1;
-    /**
-     * 执行心跳处理 , 单位毫秒
-     */
+    /** 执行心跳处理 , 单位毫秒 */
     protected volatile long cacheHeartTimer = -1;
-    /**
-     * 缓存加载
-     */
+    /** 缓存加载 */
     public Function<K, V> loading;
     /** 定时心跳 返回 true 才能允许删除，否者即便上过期也不能删除 */
     public Function<V, Boolean> heart;
-    /**
-     * 缓存卸载
-     */
+    /** 缓存卸载 */
     public ConsumerE2<V, String> unload;
 
     private final ConcurrentHashMap<K, CacheValue<V>> cacheValues = new ConcurrentHashMap<>();
@@ -187,20 +170,18 @@ public class CachePack<K, V> implements Serializable {
         if (k == null) {
             return null;
         }
-        CacheValue<V> cacheValue = this.cacheValues.computeIfAbsent(k,
-                l -> {
-                    if (load && this.getLoading() != null) {
-                        V apply = this.getLoading().apply(l);
-                        if (apply != null) {
-                            return new CacheValue<V>()
-                                    .setSlideCache(this.cacheSlide)
-                                    .setSurvivalTime(this.cacheSurvivalTime)
-                                    .setValue(apply);
-                        }
-                    }
-                    return null;
+        CacheValue<V> cacheValue = this.cacheValues.computeIfAbsent(k, l -> {
+            if (load && this.getLoading() != null) {
+                V apply = this.getLoading().apply(l);
+                if (apply != null) {
+                    return new CacheValue<V>()
+                            .setSlideCache(this.cacheSlide)
+                            .setSurvivalTime(this.cacheSurvivalTime)
+                            .setValue(apply);
                 }
-        );
+            }
+            return null;
+        });
         if (cacheValue == null) return null;
         /*更新最后获取缓存的时间*/
         cacheValue.setLastGetCacheTime(System.currentTimeMillis());
@@ -257,13 +238,13 @@ public class CachePack<K, V> implements Serializable {
 
     private void remove(K k, V v, String logs) {
         if (this.getUnload() == null) {
-            LoggerFactory.getLogger(this.getClass()).info(logs + " -> " + this.cacheName + ", key=" + k + ", value=" + v);
+            log.info(logs + " -> " + this.cacheName + ", key=" + k + ", value=" + v);
             return;
         }
         try {
             this.getUnload().accept(v, logs);
         } catch (Exception ex) {
-            LoggerFactory.getLogger(this.getClass()).error(logs + " -> " + this.cacheName + ", key=" + k + ", 移除缓存异常", ex);
+            log.error(logs + " -> " + this.cacheName + ", key=" + k + ", 移除缓存异常", ex);
         }
 
     }
