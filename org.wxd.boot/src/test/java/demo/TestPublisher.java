@@ -19,11 +19,7 @@ public class TestPublisher {
     @Test
     public void t1() throws Exception {
         Mono.create(() -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    try {Thread.sleep(1000);} catch (InterruptedException e) {throw new RuntimeException(e);}
                     return 1;
                 })
                 .subscribe(v -> log.debug("{}", v))
@@ -42,9 +38,7 @@ public class TestPublisher {
                     try {
                         Thread.sleep(1000);
                         return List.of(1, 2, 3, 4);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    } catch (InterruptedException e) {throw new RuntimeException(e);}
                 })
                 .subscribe(v -> log.debug("{}", v))
                 .map(i -> "我是Flux：" + i)
@@ -57,11 +51,9 @@ public class TestPublisher {
                 })
         ;
 
-        Flux.create(() -> {
-                    return List.of(List.of(1, 2, 3), List.of(7, 8, 9));
-                })
+        Flux.create(() -> {return List.of(List.of(1, 2, 3), List.of(7, 8, 9));})
                 .subscribe(v -> log.debug("{}", v))
-                .flatMap(v->v.stream())
+                .flatMap(v -> v.stream())
                 .map(i -> "我是Flux：" + i)
                 .orComplete(() -> List.of("我是特殊值 Flux"))
                 .subscribe(v -> log.debug("{}", v))

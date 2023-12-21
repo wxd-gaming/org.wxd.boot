@@ -22,7 +22,7 @@ import java.io.File;
  **/
 public interface HttpFtp {
 
-    Logger log = LoggerFactory.getLogger(HttpUpload.class);
+    Logger log = LoggerFactory.getLogger(HttpFtp.class);
 
     @TextMapping
     default void ftp(HttpSession httpSession, ObjMap putData) throws Exception {
