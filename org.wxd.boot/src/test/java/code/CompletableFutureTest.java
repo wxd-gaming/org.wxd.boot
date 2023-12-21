@@ -21,7 +21,7 @@ public class CompletableFutureTest {
             }
         };
         // CompletableFuture.supplyAsync(supplier, Executors.getVTExecutor());
-        CompletableFuture<Long> completable = Executors.getVTExecutor().completableFuture(supplier);
+        CompletableFuture<Long> completable = Executors.getDefaultExecutor().completableFuture(supplier);
         completable.thenAccept(v -> System.out.println(v));
         while (true) ;
     }

@@ -1,7 +1,6 @@
 package org.wxd.boot.publisher;
 
 import lombok.Getter;
-import org.wxd.boot.threading.Executors;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -26,7 +25,7 @@ public class Mono<T> {
 
     /** 创建异步获取数据 */
     public static <U> Mono<U> create(Supplier<U> supplier) {
-        return new Mono<>(Executors.getVTExecutor().completableFuture(supplier));
+        return new Mono<>(CompletableFuture.supplyAsync(supplier));
     }
 
     /** 当未查找到数据，并且无异常的情况下，赋值给定值 */

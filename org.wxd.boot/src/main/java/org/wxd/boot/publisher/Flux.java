@@ -1,7 +1,6 @@
 package org.wxd.boot.publisher;
 
 import lombok.Getter;
-import org.wxd.boot.threading.Executors;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +28,7 @@ public class Flux<T> {
 
     /** 创建异步获取数据 */
     public static <U> Flux<U> create(Supplier<Collection<U>> supplier) {
-        return new Flux<>(Executors.getVTExecutor().completableFuture(supplier));
+        return new Flux<>(CompletableFuture.supplyAsync(supplier));
     }
 
     /** 当未查找到数据，并且无异常的情况下，赋值给定值 */
