@@ -182,12 +182,12 @@ public interface IExecutorServices extends Executor {
     }
 
     /** 提交带回调的执行 */
-    default <V> CompletableFuture<V> completable(Supplier<V> supplier) {
+    default <V> CompletableFuture<V> completableFuture(Supplier<V> supplier) {
         return CompletableFuture.supplyAsync(supplier, this);
     }
 
     /** 提交带回调的执行 */
-    default CompletableFuture<Void> completable(Runnable runnable) {
+    default CompletableFuture<Void> completableFuture(Runnable runnable) {
         return CompletableFuture.runAsync(runnable, this);
     }
 

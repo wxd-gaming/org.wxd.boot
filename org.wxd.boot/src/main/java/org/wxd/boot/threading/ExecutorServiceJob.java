@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
 
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -42,10 +43,10 @@ class ExecutorServiceJob implements Runnable, Job {
     public void check(StringBuilder stringBuilder) {
 
         long warningTime = 5000;
-
         if (task instanceof EventRunnable eventRunnable) {
             warningTime = eventRunnable.getWarningTime();
         }
+
         long procc = (System.nanoTime() - startExecTime) / 10000 / 100;
         if (procc > warningTime && procc < 864000000L) {
             /*小于10天//因为多线程操作时间可能不准确*/
@@ -102,6 +103,11 @@ class ExecutorServiceJob implements Runnable, Job {
                 }
 
                 long warningTime = 1000;
+
+                if (task instanceof ForkJoinTask) {
+                    logTime = 300;
+                    warningTime = 5000;
+                }
 
                 if (task instanceof EventRunnable eventRunnable) {
                     logTime = eventRunnable.getLogTime();
