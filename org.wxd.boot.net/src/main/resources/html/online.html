@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线用户</title>
+
+    <script charset="utf-8" type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script charset="utf-8" type="text/javascript" src="https://test-center.xiaw.net:18800/js/com.wxd.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="http://test-center.xiaw.net:18800/style/com.wxd.css"/>
+    <link rel="stylesheet" type="text/css" href="http://test-center.xiaw.net:18800/style/table.css"/>
+
+    <style>
+        html, body {display: block;width: 100%;height: 100%;overflow: hidden;overflow-x: auto;background: rgba(98, 143, 139, 0.31);}
+
+        html, body, div, table, tr, td {margin: 0px;border: 0px;box-sizing: border-box;}
+
+        a:link {color: #0866b4;}
+
+        a:visited { color: #0866b4;}
+
+        label {padding-left: 5px;padding-right: 5px;}
+
+    </style>
+
+    <script>
+
+        function ban(url, uid) {
+            let urlQuery = new wxd.Map().loadSearch();
+            urlQuery.put("uid", uid);
+            wxd.netty.post(url, urlQuery.toString(),
+                function (responseText) {
+                    wxd.message.alert(
+                        JSON.stringify(responseText),
+                        "提示：",
+                        "关闭",
+                        () => {
+                            setTimeout(() => {
+                                searchName();
+                            }, 1);
+                        }
+                    );
+                },
+                (errorMsg) => {
+                    wxd.message.alert("异常：" + errorMsg);
+                },
+                false
+            );
+        }
+
+        function searchName() {
+            $("#div_loading").show();
+            let urlQuery = new wxd.Map().loadSearch();
+            urlQuery.put("search", $("#search").val());
+            let url = "/gm/001/002/003/onlineBody";
+            wxd.netty.post(url, urlQuery.toString(),
+                function (responseText) {
+                    let parse = JSON.parse(responseText);
+                    $("tbody:first").html("");
+                    var index = 0;
+                    parse.forEach((row) => {
+                        index++;
+                        $("tbody:first").append(createRow(index, row));
+                    });
+                    wxd.message.tips_init_bind(); //初始化
+                    colse_loading();
+                },
+                (errorMsg) => {
+                    colse_loading();
+                    wxd.message.alert("异常：" + errorMsg);
+                },
+                false
+            );
+        }
+
+        function createRow(index, row) {
+            let tr = `
+    <tr>
+        <td style="width: 140px;">
+            <a href="#" onclick="ban('/gm/001/002/003/banLogin', '${row.id}');return false;" title="封号和解封">封号</a>
+            <a href="#" onclick="ban('/gm/001/002/003/banChat', '${row.id}');return false;" title="禁言和解禁">禁言</a>
+            <a href="#" onclick="ban('/gm/001/002/003/clearRank', '${row.id}');return false;" title="清理排行榜">排行榜</a>
+            <a href="#" onclick="ban('/gm/001/002/003/kickout', '${row.id}');return false;" title="踢出下线并且清理内存">踢人</a>
+        </td>
+        <td tips="true" style="width: 40px;">${index}</td>
+        <td tips="true" style="width: 80px;">${row.banLogin} / ${row.banChat}</td>
+        <td tips="true" style="width: 80px;">${row.online} / ${row.share}</td>
+        <td style="width: 100px;" title="<label>${row.platform}</label><br><label>${row.subPlatform}</label><br>主服：<label>${row.mainServer}</label>">
+            ${row.skey}<br><label>${row.platformId}</label>/<label>${row.server}</label>
+        </td>
+        <td tips="true" style="width: 180px;">${row.aid}<br>${row.account}</td>
+        <td tips="true" style="width: 180px;">${row.id}<br>${row.name}</td>
+        <td tips="true" style="width: 120px;">${row.guildName}</td>
+        <td tips="true" style="width: 85px;">${row.zs} / ${row.lv}</td>
+        <td tips="true" style="width: 30px;">${row.viplv}</td>
+        <td tips="true">
+            <label>累：${row.recharge}</label>
+            <label>代：${row.replaceRecharge}</label>
+            <label>红：${row.redBagRecharge}</label>
+            /
+            <label>今：${row.rechargeToday}</label>
+            <label>代：${row.replaceRechargeToday}</label>
+            <label>红：${row.redBagRechargeToday}</label>
+            <br>
+            <label>钻石：${row.gold}</label>
+            /
+            <label>绑钻：${row.innerGold}</label>
+        </td>
+        <td tips="true" style="width: 140px;">${row.createTime}</td>
+        <td tips="true" style="width: 140px;">${row.loginTime}<br>${row.logoutTime}</td>
+        <td tips="true" style="width: 100px;">${row.onlineTime}<br>${row.loginDays}</td>
+    </tr>
+`;
+            return tr;
+        }
+
+        function colse_loading() {
+            setTimeout(() => {
+                $("#div_loading").hide();
+            }, 200);
+        }
+
+        $(() => {
+            let url = "/gm/001/002/003/onlineBase";
+            wxd.netty.post(url, "",
+                function (responseText) {
+                    let parse = JSON.parse(responseText);
+                    $("#base").html("");
+                    let base = `
+                            <br>
+                            ${parse.showMemoryString}
+                            <br>
+                            ${parse.showDiskInfo}
+                            <br>
+                            tcp连接数：${parse.tcpSize}
+                            <br>
+                            玩家数据 ->
+                            <label>账号数：${parse.accountAllNum},</label>
+                            <label>角色数：${parse.roleAllNum},</label>
+                            <label>充值：${parse.rechargeMoney},</label>
+                            <label>代金券：${parse.replaceMoneyCount},</label>
+                            <label>QQ缓存：${parse.qqCacheNum},</label>
+                            <label>缓存：${parse.cacheNum},</label>
+                            <label>在线：${parse.onlineSize},</label>
+                            <label>跨服用户：${parse.crossSize}</label>
+                        `;
+                    $("#base").append(base);
+                },
+                (errorMsg) => {
+                    wxd.message.alert("异常：" + errorMsg);
+                },
+                false
+            );
+            searchName();
+        });
+
+    </script>
+
+</head>
+
+<body>
+<div id="base" style="padding-left: 15px;">
+
+</div>
+<br>
+<div style="text-align: left;padding-left: 10px;">
+    <input type="button" value="搜索" onclick="searchName();">
+    <input id="search" type="text" value="" style="width: 300px;" onkeydown="if (event.keyCode===13)searchName();" placeholder="玩家名字或者玩家ID"/>
+</div>
+<div class="tableDom" style="position: absolute;left: 2px;top: 140px;right: 2px;bottom: 0px;padding-right: 10px;border-radius: 0px;">
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 140px;">操作</th>
+            <th style="width: 40px;">序号</th>
+            <th style="width: 80px;">封号/禁言</th>
+            <th style="width: 80px;">在线/跨服</th>
+            <th style="width: 100px;">平台/区服</th>
+            <th style="width: 180px;">账号</th>
+            <th style="width: 180px;">角色</th>
+            <th style="width: 120px;">行会</th>
+            <th style="width: 85px;">转生/等级</th>
+            <th style="width: 30px;">VIP</th>
+            <th>充值</th>
+            <th style="width: 140px;">注册</th>
+            <th style="width: 140px;">登录/下线</th>
+            <th style="width: 100px;">在线/天数</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+<div id="div_loading" style="display: block;position: absolute;left: 0px;top: 0px;right: 0px;bottom: 0px;z-index: 9999;background: rgba(69,68,68,0.2);">
+    <img style="position: absolute;left: 50%;top: 50%;transform: translate(-50%,-50%)" src="http://test-center.xiaw.net:18800/loading-4.gif">
+</div>
+
+</body>
+
+</html>

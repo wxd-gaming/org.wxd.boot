@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线用户</title>
+
+    <script charset="utf-8" type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script charset="utf-8" type="text/javascript" src="http://test-center.xiaw.net:18800/js/com.wxd.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="http://test-center.xiaw.net:18800/style/com.wxd.css"/>
+    <link rel="stylesheet" type="text/css" href="http://test-center.xiaw.net:18800/style/table.css"/>
+
+    <style>
+        html, body {display: block;width: 100%;height: 100%;overflow: hidden;overflow-x: auto;background: rgba(98, 143, 139, 0.31);}
+
+        html, body, div, table, tr, td {margin: 0px;border: 0px;box-sizing: border-box;}
+
+        a:link {color: #0866b4;}
+
+        a:visited { color: #0866b4;}
+
+        label {padding-left: 5px;padding-right: 5px;}
+
+    </style>
+
+    <script>
+
+        function searchName() {
+            $("#div_loading").show();
+            let urlQuery = new wxd.Map().loadSearch();
+            urlQuery.put("content", "1");
+            wxd.netty.post(location.href, urlQuery.toString(),
+                function (responseText) {
+                    let parse = JSON.parse(responseText);
+                    $("tbody:first").html("");
+                    parse.forEach((row) => {
+                        $("tbody:first").append(createRow(row));
+                    });
+                    wxd.message.tips_init_bind(); //初始化
+                    colse_loading();
+                },
+                (errorMsg) => {
+                    colse_loading();
+                    wxd.message.alert("异常：" + errorMsg);
+                },
+                false
+            );
+        }
+
+        function createRow(row) {
+            let tr = `
+    <tr>
+        <td tips="true">${row.msg}</td>
+        <td tips="true">${row.comment}</td>
+        <td tips="true">${row.count}</td>
+        <td tips="true">${row.roles}</td>
+        </tr>
+`;
+            return tr;
+        }
+
+        function colse_loading() {
+            setTimeout(() => {
+                $("#div_loading").hide();
+            }, 200);
+        }
+
+        $(() => {
+            searchName();
+        });
+
+    </script>
+
+</head>
+
+<body>
+<div class="tableDom" style="position: absolute;left: 2px;top: 5px;right: 2px;bottom: 0px;padding-right: 10px;border-radius: 0px;">
+    <table>
+        <thead>
+        <tr>
+            <th>消息</th>
+            <th>备注</th>
+            <th>请求次数</th>
+            <th>玩家数量</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+<div id="div_loading" style="display: block;position: absolute;left: 0px;top: 0px;right: 0px;bottom: 0px;z-index: 9999;background: rgba(69,68,68,0.2);">
+    <img style="position: absolute;width: 64px;height: 20px;left: 50%;top: 50%;transform: translate(-50%,-50%)" src="http://test-center.xiaw.net:18800/loading-0.gif">
+</div>
+
+</body>
+
+</html>

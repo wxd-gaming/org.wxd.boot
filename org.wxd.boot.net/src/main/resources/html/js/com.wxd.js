@@ -59,29 +59,27 @@ const wxd = {
      * @returns {Promise<unknown>}
      */
     delayed: function (action, interval, execCount) {
-        if (execCount < 1) return null;
+        if (execCount < 1) return;
         return new Promise((resolve, reject) => {
                 let curExecCount = 0;
                 let intervalTmp = setInterval(() => {
                     try {
-                        let ret = action();
-                        if (ret !== true) {
-                            console.log("用户调用取消 " + ret + ", curExecCount=" + curExecCount)
-                            clearInterval(intervalTmp);
+                        let action1 = action(curExecCount);
+                        if (action1 === false) {
                             resolve('');
+                            clearInterval(intervalTmp);
                             return;
                         }
                     } catch (ex) {
                         console.info("delayed exception " + ex);
-                        clearInterval(intervalTmp);
                         resolve('');
+                        clearInterval(intervalTmp);
                         return;
                     }
                     curExecCount++;
                     if (curExecCount >= execCount) {
-                        console.log("执行结束取消 " + curExecCount)
-                        clearInterval(intervalTmp);
                         resolve('');
+                        clearInterval(intervalTmp);
                     }
                 }, interval);
             }
@@ -140,13 +138,13 @@ const wxd = {
     draggable: function (mbox_title) {
         $(mbox_title).mousedown(function (e) {
             //鼠标按下
-            let old_mouse = e || window.event;
+            var old_mouse = e || window.event;
             //原鼠标坐标
-            let old_m_x = old_mouse.clientX;
-            let old_m_y = old_mouse.clientY;
+            var old_m_x = old_mouse.clientX;
+            var old_m_y = old_mouse.clientY;
             //原div坐标
-            let parent_x = $(this).parent().offset().left;
-            let parent_y = $(this).parent().offset().top;
+            var parent_x = $(this).parent().offset().left;
+            var parent_y = $(this).parent().offset().top;
 
             $(document.body).mousemove(function (e) {
                 $(mbox_title).parent().css("transform", "translate(0,0)");
@@ -438,7 +436,7 @@ const wxd = {
             let box = `
 <div class="upload_file_box">
     <strong>文件上传</strong>
-    <span class="span_close" title="关闭" onclick="$('.upload_file_bg').remove()">X</span>
+    <span class="span_close" title="关闭" onclick="$('.upload_file_bg').remove()"></span>
     <div class="upload_file_c">
         <div class="upload_file_c_1" style="max-height: ${bodyHeight}px;">
             <br>
@@ -617,7 +615,7 @@ const wxd = {
                         try {
                             onLoad(data);
                         } catch (e) {
-                            console.error("error: " + e + "\n" + data);
+                            console.error("error: " + e + "\n" + JSON.stringify(data));
                             wxd.message.notice("error: " + e, true);
                         }
                     } else {
@@ -752,7 +750,7 @@ ${text}
             let a_c = `
 <div class="message_alert_box">
     <strong class="ban_select">${title}</strong>
-    <span class="span_close ban_select" title="关闭" onclick="wxd.message.alert_cancel()">X</span>
+    <span class="span_close ban_select" title="关闭" onclick="wxd.message.alert_cancel()"></span>
     <div class="message_alert_c">
         <div class="message_alert_c_1" style="max-height: ${bodyHeight}px;">
             ${content}
@@ -790,7 +788,6 @@ ${text}
         tips_y: 15,
         tips_tmp_title: "",
         tips_init_end: false,
-        /** 初始化 */
         tips_init: function () {
             if (this.tips_init_end) return;
 

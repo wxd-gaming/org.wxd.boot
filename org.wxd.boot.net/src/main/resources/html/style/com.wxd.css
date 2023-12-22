@@ -18,7 +18,7 @@ a:hover, a:active { color: #33be85; }
 
 .ban_select { /*禁止选择*/-webkit-user-select: none; /* webkit浏览器 */ -moz-user-select: none; /* Firefox */ -ms-user-select: none; /* IE10+ */ user-select: none; /* 标准语法 */}
 
-.span_close {border-radius: 65px;background-color: rgba(245, 95, 28, 0.64);position: absolute;font-size: 2px;width: 20px;height: 20px;box-sizing: border-box;padding-left: 6px;padding-top: 2px;cursor: pointer;top: 8px;right: 12px;}
+.span_close {border-radius: 65px;background-color: rgba(245, 95, 28, 0.64);position: absolute;width: 20px;height: 20px;box-sizing: border-box;padding-left: 6px;padding-top: 2px;cursor: pointer;top: 8px;right: 12px;}
 
 .full_loading_bg {display: block;position: absolute;left: 0px;top: 0px;right: 0px;bottom: 0px;z-index: 9999;background: rgba(69, 68, 68, 0.2);}
 
