@@ -170,7 +170,7 @@ public class HttpServer extends NioServer<HttpSession> {
                         }
                     }
                 } else if (!reqMethod.equals(HttpMethod.GET)) {
-                    response(session, HttpHeadValueType.Html, NioFactory.EmptyBytes);
+                    response(session, HttpHeadValueType.Text, NioFactory.EmptyBytes);
                     return;
                 }
 
@@ -296,33 +296,21 @@ public class HttpServer extends NioServer<HttpSession> {
         });
     }
 
-    /**
-     * 关闭链接
-     *
-     * @param session
-     * @param msg
-     */
-    public static void response(HttpSession session, String msg) {
-        try {
-            log.warn("异常链接：" + msg);
-            response(session, HttpVersion.HTTP_1_1, HttpResponseStatus.OK, HttpHeadValueType.Html, NioFactory.EmptyBytes);
-        } catch (Throwable ex) {
-            log.error("HttpRequestMessage.close 失败", ex);
-        }
+    public static void response500(HttpSession session, String res) {
+        response(session, HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, HttpHeadValueType.Text, res.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** 关闭链接 */
     public static void response(HttpSession session, HttpHeadValueType contentType, byte[] bytes) {
         response(session, HttpVersion.HTTP_1_1, HttpResponseStatus.OK, contentType, bytes);
     }
 
-    /**
-     * 关闭链接
-     */
+    /** 关闭链接 */
     public static void response(HttpSession session, HttpVersion hv, HttpResponseStatus hrs, HttpHeadValueType contentType, byte[] bytes) {
         response(session, hv, hrs, contentType, bytes, null);
     }
 
-    public static void response(HttpSession session, HttpVersion hv, HttpResponseStatus hrs, HttpHeadValueType contentType, byte[] bytes, Consumer<HttpResponse> before) {
+    public static void response(HttpSession session, HttpVersion hv, HttpResponseStatus hrs, HttpHeadValueType contentType, final byte[] bytes, Consumer<HttpResponse> before) {
         try {
             session.responseOver();
             if (session.getRequest() == null) {
@@ -384,13 +372,11 @@ public class HttpServer extends NioServer<HttpSession> {
             if (session.isShowLog() || log.isDebugEnabled()) {
                 StringBuilder stringBuilder = session.showLog();
                 if (!stringBuilder.isEmpty()) {
-                    if (!session.getResponseContent().isEmpty()) {
-                        stringBuilder
-                                .append(";\n=============================================输出================================================")
-                                .append("\n").append(session.getResponseContent().toString())
-                                .append("\n=============================================结束================================================")
-                                .append("\n");
-                    }
+                    stringBuilder
+                            .append(";\n=============================================输出================================================")
+                            .append("\n").append(new String(bytes, StandardCharsets.UTF_8))
+                            .append("\n=============================================结束================================================")
+                            .append("\n");
                     log.info(stringBuilder.toString());
                 }
             }

@@ -141,7 +141,7 @@ public class TcpClient<S extends TcpSession> extends NioClient<S> implements ILo
         @Override
         protected void channelRead0(S session, Object msg) {
             ByteBuf byteBuf = (ByteBuf) msg;
-            read(TcpClient.this, session, byteBuf);
+            read(session, byteBuf);
         }
 
     }

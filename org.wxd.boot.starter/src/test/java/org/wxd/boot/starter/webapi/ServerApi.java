@@ -15,7 +15,7 @@ import org.wxd.boot.starter.service.HsService;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2023-12-13 18:50
  **/
-@TextController(serviceName = "sdk")
+@TextController()
 public class ServerApi implements IBeanInit {
 
     @Inject HsService hsService;
@@ -27,6 +27,11 @@ public class ServerApi implements IBeanInit {
     @TextMapping(remarks = "sdk处理")
     public String index(HttpSession httpSession, ObjMap objMap) {
         return "holle";
+    }
+
+    @TextMapping(remarks = "sdk处理", needAuth = 1)
+    public String sdk(HttpSession httpSession, ObjMap objMap) {
+        return "sdk";
     }
 
 }

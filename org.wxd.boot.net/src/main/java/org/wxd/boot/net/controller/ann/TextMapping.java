@@ -26,6 +26,6 @@ public @interface TextMapping {
     int needAuth() default 0;
 
     /** 权限不足提示 */
-    String authTips() default "权限不足";
+    String authTips() default "权限认证失败";
 
 }

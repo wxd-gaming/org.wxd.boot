@@ -26,8 +26,7 @@ public class PublicApi {
     @TextMapping(remarks = "test")
     public void test0(HttpSession httpSession, ObjMap objMap) throws Exception {
         httpSession.responseOver();
-        httpSession.getResponseContent().write("test");
-        httpSession.response();
+        httpSession.responseText("test");
     }
 
     @TextMapping(remarks = "test")

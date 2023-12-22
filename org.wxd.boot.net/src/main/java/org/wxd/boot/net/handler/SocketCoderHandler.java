@@ -14,7 +14,6 @@ import org.wxd.boot.net.controller.MappingFactory;
 import org.wxd.boot.net.controller.MessageController;
 import org.wxd.boot.net.controller.ProtoMappingRecord;
 import org.wxd.boot.net.controller.TextMappingRecord;
-import org.wxd.boot.net.controller.cmd.ITokenCache;
 import org.wxd.boot.net.message.MessagePackage;
 import org.wxd.boot.net.message.Rpc;
 import org.wxd.boot.net.message.RpcEvent;
@@ -59,7 +58,7 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
     SocketCoderHandler<S> msgExecutorBefore(Predicate<MessageController> consumer);
 
     /** 处理网络接受到的消息字节 */
-    default void read(ITokenCache tokenCache, S session, ByteBuf byteBuf) {
+    default void read(S session, ByteBuf byteBuf) {
         session.checkReadTime();
         /*netty底层每一次传递的bytebuf都是最新的所以必须缓存*/
         ByteBuf tmpByteBuf;
@@ -84,7 +83,6 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
                 /*读取报文类容*/
                 tmpByteBuf.readBytes(messageBytes);
                 action(
-                        tokenCache,
                         session,
                         messageId,
                         messageBytes
@@ -109,7 +107,7 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
         }
     }
 
-    default void action(ITokenCache tokenCache, S session, int messageId, byte[] messageBytes) {
+    default void action(S session, int messageId, byte[] messageBytes) {
         try {
             if (messageId == MessagePackage.getMessageId(Rpc.ReqRemote.class)) {
                 Rpc.ReqRemote reqSyncMessage = Rpc.ReqRemote.parseFrom(messageBytes);
@@ -157,7 +155,7 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
                         }
 
                         final String methodNameLowerCase = cmd.toLowerCase().trim();
-                        TextMappingRecord mappingRecord = MappingFactory.textMappingRecord(tokenCache.getName(), methodNameLowerCase);
+                        TextMappingRecord mappingRecord = MappingFactory.textMappingRecord(getName(), methodNameLowerCase);
                         if (mappingRecord == null) {
                             log.info("{} not found url {}", session.getChannelContext(), cmd);
                             if (rpcId > 0) {
@@ -167,7 +165,7 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
                         }
                         final MarkTimer markTimer = MarkTimer.build();
                         final StreamWriter outAppend = new StreamWriter(1024);
-                        CmdListenerAction listenerAction = new CmdListenerAction(mappingRecord, tokenCache, session, cmd, putData, outAppend, (showLog) -> {
+                        CmdListenerAction listenerAction = new CmdListenerAction(mappingRecord, session, cmd, putData, outAppend, (showLog) -> {
                             if (showLog) {
                                 log.info("\n执行：" + this.toString()
                                         + "\n" + markTimer.execTime2String() +
@@ -199,7 +197,7 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
                     } else {
                         log.info(
                                 "{} 同步消息回来后，找不到同步对象 {}, rpcId={}, params={}",
-                                tokenCache.toString(),
+                                getName(),
                                 this.toString(),
                                 resSyncMessage.getRpcId(),
                                 params,

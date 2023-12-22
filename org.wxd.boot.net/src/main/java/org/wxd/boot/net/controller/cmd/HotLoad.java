@@ -7,6 +7,7 @@ import org.wxd.boot.agent.io.FileWriteUtil;
 import org.wxd.boot.agent.system.Base64Util;
 import org.wxd.boot.agent.zip.ZipUtil;
 import org.wxd.boot.lang.RunResult;
+import org.wxd.boot.lang.SyncJson;
 import org.wxd.boot.net.controller.ann.TextMapping;
 import org.wxd.boot.net.web.hs.HttpSession;
 import org.wxd.boot.str.json.FastJsonUtil;
@@ -26,21 +27,19 @@ public interface HotLoad {
 
     @TextMapping(remarks = "停止进程")
     default void stop(HttpSession httpSession) throws Exception {
-        httpSession.getResponseContent().write(RunResult.ok().setData("停止进程中 等待 30 秒"));
-        httpSession.response();
+        httpSession.responseText(SyncJson.ok().data("停止进程中 等待 30 秒"));
         LocalShell.exec(
                 new File(System.getProperty("user.dir")),
-                "sudo java -cp \"jshell.zip\" jshell.JarShell stop &"
+                "sudo bash service.sh stop &"
         );
     }
 
     @TextMapping(remarks = "重启程序")
     default void restart(HttpSession httpSession) throws Exception {
-        httpSession.getResponseContent().write(RunResult.ok().setData("重启成功 等待 30 秒"));
-        httpSession.response();
+        httpSession.responseText(SyncJson.ok().data("重启成功 等待 30 秒"));
         LocalShell.exec(
                 new File(System.getProperty("user.dir")),
-                "sudo java -cp \"jshell.zip\" jshell.JarShell restart &"
+                "sudo bash service.sh restart &"
         );
     }
 

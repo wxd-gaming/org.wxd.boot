@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.wxd.boot.append.StreamWriter;
 import org.wxd.boot.collection.ObjMap;
 import org.wxd.boot.httpclient.HttpDataAction;
 import org.wxd.boot.httpclient.HttpHeadValueType;
+import org.wxd.boot.lang.SyncJson;
 import org.wxd.boot.net.NioFactory;
 import org.wxd.boot.net.Session;
 import org.wxd.boot.net.ssl.WxOptionalSslHandler;
@@ -77,10 +77,6 @@ public class HttpSession extends Session implements Serializable {
     private String completeUri;
 
     protected AtomicBoolean responseOver = new AtomicBoolean();
-    protected HttpResponseStatus httpResponseStatus = HttpResponseStatus.OK;
-    protected HttpHeadValueType resContentType = HttpHeadValueType.Text;
-    /** 输出流 */
-    protected StreamWriter responseContent = new StreamWriter(512);
     protected StringBuilder showLogStringBuilder;
 
     public HttpSession(String name, ChannelHandlerContext ctx) {
@@ -91,10 +87,6 @@ public class HttpSession extends Session implements Serializable {
      * 释放输入，输出buf
      */
     public void releaseBuf() {
-        try {
-            this.getResponseContent().close();
-        } catch (Exception e) {
-        }
         reqContentByteBuf = null;
     }
 
@@ -107,7 +99,7 @@ public class HttpSession extends Session implements Serializable {
         relock.lock();
         try {
             if (isDisConnect()) return;
-            if (!responseOver.get()) response();
+            if (!responseOver.get()) responseText("");
             log.debug("firstReadTime:{} ms, lastReadTime:{} ms, ResTime:{} ms, OverTime:{} ms {}",
                     (firstReadTime - initTime),
                     (lastReadTime - initTime),
@@ -132,8 +124,44 @@ public class HttpSession extends Session implements Serializable {
     }
 
     /** HttpContentType.html 回复 http 请求 */
-    public void response() {
-        response(HttpVersion.HTTP_1_1, httpResponseStatus, getResContentType(), this.getResponseContent().toBytes());
+    public void responseText(String res) {
+        responseText(res.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void responseText(SyncJson res) {
+        responseText(res.toJson().getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void responseText(byte[] res) {
+        response(HttpHeadValueType.Text, res);
+    }
+
+    public void responseJson(String res) {
+        responseJson(res.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void responseJson(SyncJson res) {
+        responseJson(res.toJson().getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void responseJson(byte[] res) {
+        response(HttpHeadValueType.Json, res);
+    }
+
+    public void responseHtml(String res) {
+        responseHtml(res.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void responseHtml(byte[] res) {
+        response(HttpHeadValueType.Html, res);
+    }
+
+    public void response(HttpHeadValueType httpHeadValueType, byte[] bytes) {
+        response(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, httpHeadValueType, bytes);
+    }
+
+    public void response500(String res) {
+        HttpServer.response500(this, res);
     }
 
     /** HttpContentType.html 回复 http 请求 */

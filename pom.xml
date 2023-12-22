@@ -21,6 +21,7 @@
         <module>org.wxd.boot.net</module>
         <module>org.wxd.boot.starter</module>
         <module>org.wxd.boot.jscript</module>
+        <module>org.wxd.boot.net.http2service</module>
     </modules>
 
     <properties>

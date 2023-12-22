@@ -1,5 +1,7 @@
 package org.wxd.boot.net.controller;
 
+import org.wxd.boot.net.controller.ann.TextMapping;
+
 import java.lang.reflect.Method;
 
 /**
@@ -11,6 +13,7 @@ import java.lang.reflect.Method;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2023-12-12 20:13
  */
-public record TextMappingRecord(String serviceName, String remarks, String path, Object instance, Method method) {
-
+public record TextMappingRecord(TextMapping textMapping,
+        String serviceName, String path, String remarks, Object instance,
+        Method method) {
 }

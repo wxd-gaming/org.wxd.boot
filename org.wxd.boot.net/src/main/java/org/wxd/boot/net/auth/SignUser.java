@@ -1,4 +1,4 @@
-package org.wxd.boot.net;
+package org.wxd.boot.net.auth;
 
 import lombok.Getter;
 import lombok.Setter;

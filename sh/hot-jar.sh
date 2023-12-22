@@ -1,0 +1,1 @@
+curl -POST -v http://127.0.0.1:18800/gm/hotScripts?authorization=566dca81bdc2ee0db1e427d79630b905

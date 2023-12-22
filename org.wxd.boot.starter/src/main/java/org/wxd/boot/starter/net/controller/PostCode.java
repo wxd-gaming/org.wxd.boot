@@ -9,7 +9,8 @@ import org.wxd.boot.agent.zip.ZipUtil;
 import org.wxd.boot.collection.ObjMap;
 import org.wxd.boot.httpclient.url.HttpBuilder;
 import org.wxd.boot.lang.RunResult;
-import org.wxd.boot.net.SignConfig;
+import org.wxd.boot.net.auth.IAuth;
+import org.wxd.boot.net.auth.SignConfig;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.str.json.FastJsonUtil;
 import org.wxd.boot.system.PrintConsole;
@@ -125,9 +126,10 @@ public class PostCode implements PrintConsole {
 
     protected RunResult post0(String url, Map<Object, Object> objects) {
         String readIp = readIp();
-        objects.put(HttpHeaderNames.AUTHORIZATION.toString(), SignConfig.get().getToken());
+        objects.put(HttpHeaderNames.AUTHORIZATION.toString(), SignConfig.get().optByUser("root").map(IAuth::getToken).orElse(""));
         String post = HttpBuilder.postMulti(readIp + "/" + url)
                 .timeout(400000)
+                .header(HttpHeaderNames.AUTHORIZATION.toString(), SignConfig.get().optByUser("root").map(IAuth::getToken).orElse(""))
                 .header(HttpHeaderNames.CONTENT_ENCODING.toString(), HttpHeaderValues.GZIP.toString())
                 // .addCookie(HttpHeaderNames.AUTHORIZATION, SignConfig.get().getToken())
                 .putParams(objects)

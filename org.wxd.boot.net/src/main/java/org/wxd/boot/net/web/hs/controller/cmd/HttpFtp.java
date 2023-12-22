@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.io.FileUtil;
 import org.wxd.boot.collection.ObjMap;
-import org.wxd.boot.httpclient.HttpHeadValueType;
 import org.wxd.boot.httpclient.HttpDataAction;
 import org.wxd.boot.net.controller.ann.TextMapping;
 import org.wxd.boot.net.web.hs.HttpServer;
@@ -50,8 +49,7 @@ public interface HttpFtp {
         final File file = new File(path);
         if (file.isFile()) {
             if (show) {
-                httpSession.setResContentType(HttpHeadValueType.Text);
-                httpSession.getResponseContent().write(FileReadUtil.readBytes(file));
+                httpSession.responseText(FileReadUtil.readBytes(file));
             } else {
                 HttpServer.downloadFile(httpSession, file);
             }

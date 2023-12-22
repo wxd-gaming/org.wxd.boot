@@ -1,6 +1,7 @@
 package org.wxd.boot.net.controller;
 
 import org.wxd.boot.collection.concurrent.ConcurrentTable;
+import org.wxd.boot.net.controller.ann.TextMapping;
 import org.wxd.boot.str.StringUtil;
 
 import java.lang.reflect.Method;
@@ -32,13 +33,13 @@ public class MappingFactory {
         );
     }
 
-    public static void putText(String serviceName, String remarks, String path, Object instance, Method method) {
+    public static void putText(TextMapping textMapping, String serviceName, String path, String remarks, Object instance, Method method) {
         /** 虚拟线程 */
         if (StringUtil.emptyOrNull(serviceName)) serviceName = FINAL_DEFAULT;
         TEXT_MAP.put(
                 serviceName,
                 path,
-                new TextMappingRecord(serviceName, remarks, path, instance, method)
+                new TextMappingRecord(textMapping, serviceName, path, remarks, instance, method)
         );
     }
 

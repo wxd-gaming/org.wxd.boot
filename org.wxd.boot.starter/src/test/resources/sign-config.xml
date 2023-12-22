@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @author: Troy.Chen(無心道, 15388152619) -->
+<signConfig>
+    <sign class="org.wxd.boot.net.auth.SignUser" userName="root" token="566dca81bdc2ee0db1e427d79630b905">
+        <auth>1</auth>
+        <auth>2</auth>
+        <auth>3</auth>
+        <auth>4</auth>
+        <auth>5</auth>
+        <auth>6</auth>
+        <auth>7</auth>
+        <auth>8</auth>
+        <auth>9</auth>
+    </sign>
+    <sign class="org.wxd.boot.net.auth.SignUser" userName="platform" token="62ef4f008998a57f382a0b66ff734a7f">
+        <auth>9</auth>
+    </sign>
+    <sign class="org.wxd.boot.net.auth.SignUser" userName="qq" token="deba258b00ec2b3764f02f7f7082ca3c">
+        <auth>9</auth>
+    </sign>
+</signConfig>

@@ -1,4 +1,4 @@
-package org.wxd.boot.net;
+package org.wxd.boot.net.auth;
 
 /**
  * @author: Troy.Chen(無心道, 15388152619)

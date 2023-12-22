@@ -67,7 +67,7 @@ public class SyncJson extends ObjMap {
         return getString("data");
     }
 
-    public SyncJson data(String data) {
+    public SyncJson data(Object data) {
         put("data", data);
         return this;
     }

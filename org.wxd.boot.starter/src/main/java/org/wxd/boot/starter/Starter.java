@@ -41,7 +41,7 @@ public class Starter {
     private static volatile IocContext childIocInjector = null;
 
     /** 服务器启动成功 */
-    private static File OKFile = new File("ok.txt");
+    private static final File OKFile = new File("ok.txt");
 
     public static IocContext curIocInjector() {
         if (childIocInjector == null) return mainIocInjector;
@@ -56,32 +56,12 @@ public class Starter {
     }
 
     public static void startBoot(String... packages) {
+        JvmUtil.setLogbackConfig();
         Set<String> packages1 = OfSet.asSet(packages);
         packages1.add(AAAAA.class.getPackage().getName());
         String[] array = packages1.toArray(new String[0]);
-        ReflectContext.Builder reflectContext = ReflectContext.Builder.of(array);
-        initBoot(reflectContext);
-    }
-
-    public static void initBoot(ReflectContext.Builder builder) {
         if (mainIocInjector != null) throw new RuntimeException("不允许第二次启动");
-        JvmUtil.setLogbackConfig();
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            /*全局未捕获线程异常*/
-            @Override public void uncaughtException(Thread t, Throwable e) {
-                try {
-                    System.out.println(t);
-                    e.printStackTrace(System.out);
-                } catch (Throwable t0) {}
-            }
-        });
-
-        GlobalUtil.exceptionCall = new Consumer2<Object, Throwable>() {
-            @Override public void accept(Object o, Throwable throwable) {
-                FeishuPack.Default.asyncFeiShuNotice("异常", String.valueOf(o), throwable);
-            }
-        };
-
+        ReflectContext.Builder builder = ReflectContext.Builder.of(array);
         try {
             ReflectContext reflectContext = builder.build();
 
@@ -148,6 +128,23 @@ public class Starter {
                 JvmUtil.halt(0);
             });
             log.info("主容器初始化完成：{}", mainIocInjector.hashCode());
+
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                /*全局未捕获线程异常*/
+                @Override public void uncaughtException(Thread t, Throwable e) {
+                    try {
+                        System.out.println(t);
+                        e.printStackTrace(System.out);
+                    } catch (Throwable t0) {}
+                }
+            });
+
+            GlobalUtil.exceptionCall = new Consumer2<Object, Throwable>() {
+                @Override public void accept(Object o, Throwable throwable) {
+                    FeishuPack.Default.asyncFeiShuNotice("异常", String.valueOf(o), throwable);
+                }
+            };
+
         } catch (Throwable throwable) {
             LoggerFactory.getLogger(Starter.class).error("启动失败", throwable);
             JvmUtil.halt(-1);

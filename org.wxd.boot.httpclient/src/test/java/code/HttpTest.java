@@ -2,10 +2,14 @@ package code;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.wxd.boot.httpclient.ssl.SslProtocolType;
+import org.wxd.boot.collection.ObjMap;
 import org.wxd.boot.httpclient.url.HttpBuilder;
-import org.wxd.boot.threading.ExecutorServices;
 import org.wxd.boot.threading.Executors;
+import org.wxd.boot.threading.IExecutorServices;
+import org.wxd.boot.timer.MyClock;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 测试
@@ -17,71 +21,52 @@ import org.wxd.boot.threading.Executors;
 public class HttpTest {
 
     @Test
-    public void t1() throws InterruptedException {
-        String url = "https://laosiji.swjoy.com/client/api/5712/qr_code.do";
-
-        org.wxd.boot.httpclient.jdk.HttpBuilder.postText(url)
-                .paramText("data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .async(body -> body.systemOut());
-
-        org.wxd.boot.httpclient.jdk.HttpBuilder.postText(url)
-                .paramText("data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .request()
-                .systemOut();
-
-        Thread.sleep(5000);
+    public void r() throws Exception {
+        String url;
+        // url = "http://47.108.150.14:18800/sjcq/wanIp";
+        url = "http://192.168.50.73:19000/test/ok";
+        // url = "http://47.108.150.14:18801/test/ok";
+        // url = "http://test-center.xiaw.net:18800/sjcq/wanIp";
+        // url = "http://center.xiaw.net:18800/sjcq/wanIp";
+        // url = "https://www.baidu.com";
+        IExecutorServices services = Executors.newExecutorVirtualServices("" + MyClock.millis(), 500).setQueueCheckSize(10000);
+        tv1(url, 1, services);
+        tv1(url, 20, services);
+        tv1(url, 50, services);
+        tv1(url, 1000, services);
     }
 
-    @Test
-    public void t2() throws InterruptedException {
-        String url = "https://laosiji.swjoy.com/client/api/5712/qr_code.do";
 
-        // HttpBuilder.postText(url)
-        //         .paramText("data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-        //         .asyncByString(body -> log.debug("{}", body));
-
-        HttpBuilder.get("https://laosiji.swjoy.com/client/api/5712/qr_code.do?data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .request().systemOut();
-
-        HttpBuilder.postText(url)
-                .paramText("data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .request()
-                .systemOut();
-
-        HttpBuilder.get("http://127.0.0.1:18800/sjcq/proxySw?data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .request().systemOut();
-
-        HttpBuilder.postText("http://127.0.0.1:18800/sjcq/proxySw")
-                .paramText("data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .request()
-                .systemOut();
-
-        Thread.sleep(5000);
-    }
-
-    @Test
-    public void t3() throws Exception {
-        HttpBuilder.postText("http://47.108.81.97:18800/sjcq/proxySw")
-                .ssl(SslProtocolType.TLSV12)
-                .paramText("data=eyJndWlkIjoiNTcxMl8xNjg5MjEwNTQ0ODUxXzk2OTk5MjI2Iiwib3JkZXJObyI6IjhhZTYyMjgxZTdjZjQzOTU4ODgxZGU0ODIxZTZjMWE2Iiwicm1iIjoxMiwiaWR4IjoiNzIiLCJ0aW1lIjoxNzAyNjkzNTQ0LCJzd1RhZyI6InN3Iiwicm9sZUlkIjoiMTU4MzYxMzQwMzM0NjIzOTUyNiJ9&sign=7395de180756be1fd5d249e19bf10b5b")
-                .request()
-                .systemOut();
-    }
-
-    @Test
-    public void t4() throws Exception {
-        ExecutorServices services = Executors.newExecutorServices("t", 100, 100);
-        for (int i = 0; i < 4000; i++) {
-            services.submit(() -> {
-                HttpBuilder.postText("http://127.0.0.1:19000/sjcq/crossState")
-                        .ssl(SslProtocolType.TLSV12)
-                        .paramText("")
-                        .request()
-                        .systemOut();
+    public void tv1(String url, int testCount, IExecutorServices executor) throws Exception {
+        AtomicInteger atomicInteger = new AtomicInteger(testCount);
+        AtomicInteger source = new AtomicInteger();
+        AtomicLong allTime = new AtomicLong();
+        long l = System.nanoTime();
+        for (int i = 0; i < testCount; i++) {
+            executor.submit(() -> {
+                try {
+                    long n = System.nanoTime();
+                    HttpBuilder.postMulti(url).putParams(ObjMap.build(1, 1)).retry(2).request();
+                    allTime.addAndGet(System.nanoTime() - n);
+                    // System.out.println(response + " " + response.bodyString());
+                    source.incrementAndGet();
+                } finally {
+                    atomicInteger.decrementAndGet();
+                }
             });
-            Thread.sleep(1);
         }
-        services.shutdown();
+        while (atomicInteger.get() > 0) {}
+
+        float v1 = (System.nanoTime() - l) / 10000 / 100f;
+        float v = allTime.get() / 10000 / 100f;
+        System.out.println(
+                "HttpURLConnection - " +
+                        "请求 " + source.get() + " 次, " +
+                        "耗时：" + v1 + "(累计耗时：" + v + ") ms, " +
+                        "平均：" + v / source.get() + " ms, " +
+                        "吞吐：" + ((testCount / v1 * 1000)) + "/s"
+        );
+        Thread.sleep(500);
     }
 
 }

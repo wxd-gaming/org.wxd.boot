@@ -19,7 +19,8 @@ import org.wxd.boot.httpclient.ssl.SslContextClient;
 import org.wxd.boot.httpclient.ssl.SslProtocolType;
 import org.wxd.boot.net.NioClient;
 import org.wxd.boot.net.NioFactory;
-import org.wxd.boot.net.SignConfig;
+import org.wxd.boot.net.auth.IAuth;
+import org.wxd.boot.net.auth.SignConfig;
 import org.wxd.boot.net.handler.INotController;
 import org.wxd.boot.net.handler.SocketChannelHandler;
 import org.wxd.boot.net.ssl.WxSslHandler;
@@ -59,7 +60,7 @@ public class WebSocketClient<S extends WebSession> extends NioClient<S> {
         WebSocketClient<WebSession> client = new WebSocketClient<>()
                 .setName("post_log_client")
                 .setSsl(true).setHost("192.168.30.254").setPort(19001)
-                .addCookie(HttpHeaderNames.AUTHORIZATION.toString(), SignConfig.get().getToken())
+                .addCookie(HttpHeaderNames.AUTHORIZATION.toString(), SignConfig.get().optByUser("root").map(IAuth::getToken).orElse(""))
                 .initBootstrap();
 
         client.connect();

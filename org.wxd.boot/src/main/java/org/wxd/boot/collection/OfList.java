@@ -15,10 +15,7 @@ import java.util.List;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2021-11-03 17:24
  **/
-@Slf4j
 public class OfList implements Serializable {
-
-    private static final long serialVersionUID = 1L;
 
     public static List empty() {
         return Collections.emptyList();

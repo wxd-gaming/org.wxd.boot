@@ -1,10 +1,9 @@
-package org.wxd.boot.net;
+package org.wxd.boot.net.auth;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 import org.wxd.boot.agent.io.FileUtil;
@@ -19,8 +18,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * @author: Troy.Chen(無心道, 15388152619)
@@ -48,7 +47,6 @@ public class SignConfig extends ObjectBase implements Serializable {
             if (instance == null) {
                 try {
                     instance = new SignConfig();
-                    instance.setToken(Md5Util.md5DigestEncode("root-" + MyClock.millis() + ""));
                     instance.getUserList().add(
                             new SignUser()
                                     .setUserName("root")
@@ -80,16 +78,31 @@ public class SignConfig extends ObjectBase implements Serializable {
         return null;
     }
 
-    /** 通用秘钥 */
-    @Element
-    private String token = "";
     /** 验签秘钥账户 */
     @ElementList(required = false, inline = true, entry = "sign")
     private List<IAuth> userList = new ArrayList<>();
 
-    public <R extends IAuth> Optional<R> optional(String userName) {
-        Stream<IAuth> iAuthStream = userList.stream().filter(v -> v.getUserName().equalsIgnoreCase(userName));
-        return (Optional<R>) iAuthStream.findFirst();
+    public <R extends IAuth> Optional<R> opt(String userName, String token) {
+        return userList.stream()
+                .filter(v -> Objects.equals(v.getUserName(), userName) && Objects.equals(v.getToken(), token))
+                .findFirst()
+                .map(v -> (R) v);
+    }
+
+    public <R extends IAuth> Optional<R> optByUser(String userName) {
+        return userList.stream()
+                .filter(v -> Objects.equals(v.getUserName(), userName))
+                .findFirst()
+                .map(v -> (R) v)
+                ;
+    }
+
+    public <R extends IAuth> Optional<R> optToken(String token) {
+        return userList.stream()
+                .filter(v -> Objects.equals(v.getToken(), token))
+                .findFirst()
+                .map(v -> (R) v)
+                ;
     }
 
 }

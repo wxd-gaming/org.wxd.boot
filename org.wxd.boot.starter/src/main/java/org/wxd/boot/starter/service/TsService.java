@@ -2,7 +2,6 @@ package org.wxd.boot.starter.service;
 
 import io.netty.buffer.ByteBuf;
 import org.wxd.boot.ann.Sort;
-import org.wxd.boot.net.controller.cmd.ITokenCache;
 import org.wxd.boot.net.ts.TcpServer;
 import org.wxd.boot.net.ts.TcpSession;
 import org.wxd.boot.starter.IocContext;
@@ -38,8 +37,8 @@ public class TsService extends TcpServer<TcpSession> implements IStart, IShutdow
         close();
     }
 
-    @Override public void read(ITokenCache tokenCache, TcpSession session, ByteBuf byteBuf) {
-        super.read(tokenCache, session, byteBuf);
+    @Override public void read(TcpSession session, ByteBuf byteBuf) {
+        super.read(session, byteBuf);
     }
 
 }

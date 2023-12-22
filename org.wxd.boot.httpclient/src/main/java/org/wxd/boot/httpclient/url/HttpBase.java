@@ -61,8 +61,8 @@ public abstract class HttpBase<H extends HttpBase> {
 
     public Response<H> request() {
         Throwable throwable = null;
-        int r = 1;
-        for (; r <= retry; r++) {
+        int r = 0;
+        for (; r < retry; r++) {
             openURLConnection();
             try {
                 writer(this.response.urlConnection);
