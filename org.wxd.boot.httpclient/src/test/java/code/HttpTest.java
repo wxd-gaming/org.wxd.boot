@@ -29,7 +29,7 @@ public class HttpTest {
         // url = "http://test-center.xiaw.net:18800/sjcq/wanIp";
         // url = "http://center.xiaw.net:18800/sjcq/wanIp";
         // url = "https://www.baidu.com";
-        IExecutorServices services = Executors.newExecutorVirtualServices("" + MyClock.millis(), 500).setQueueCheckSize(10000);
+        IExecutorServices services = Executors.newExecutorServices("" + MyClock.millis(), 500).setQueueCheckSize(10000);
         tv1(url, 1, services);
         tv1(url, 20, services);
         tv1(url, 50, services);

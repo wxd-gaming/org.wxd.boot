@@ -275,7 +275,7 @@ public class WebSocketClient<S extends WebSession> extends NioClient<S> {
                             }
                         } else if (frame instanceof BinaryWebSocketFrame binaryFrame) {
                             ByteBuf byteBuf = Unpooled.wrappedBuffer(binaryFrame.content());
-                            read(WebSocketClient.this, session, byteBuf);
+                            read(session, byteBuf);
                         } else if (frame instanceof CloseWebSocketFrame) {
                             session.disConnect("CloseWebSocketFrame");
                         }
