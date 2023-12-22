@@ -1,6 +1,7 @@
 package org.wxd.boot.httpclient;
 
 import lombok.Getter;
+import org.wxd.boot.agent.io.FileUtil;
 
 import java.io.File;
 
@@ -82,43 +83,25 @@ public enum HttpHeadValueType {
      */
     public static HttpHeadValueType findContentType(File f) {
         String fileName = f.getName();
-        String extendName = fileName.substring(fileName.indexOf(".") + 1).toLowerCase();
-        return findContentType(extendName);
+        return findContentType(fileName);
     }
 
-    public static HttpHeadValueType findContentType(String extendName) {
-        switch (extendName) {
-            case "htm":
-            case "html":
-            case "jsp":
-            case "asp":
-            case "aspx":
-            case "xhtml":
-                return HttpHeadValueType.Html;
-            case "css":
-                return HttpHeadValueType.CSS;
-            case "js":
-                return HttpHeadValueType.Javascript;
-            case "xml":
-                return HttpHeadValueType.Xml;
-            case "json":
-                return HttpHeadValueType.Json;
-            case "xjson":
-                return HttpHeadValueType.XJson;
-            case "ico":
-                return HttpHeadValueType.ICO;
-            case "icon":
-                return HttpHeadValueType.ICON;
-            case "gif":
-                return HttpHeadValueType.GIF;
-            case "jpg":
-            case "jpe":
-            case "jpeg":
-                return HttpHeadValueType.JPG;
-            case "png":
-                return HttpHeadValueType.PNG;
-        }
-        return HttpHeadValueType.OctetStream;
+    public static HttpHeadValueType findContentType(String fileName) {
+        String extendName = FileUtil.extendName(fileName);
+        return switch (extendName) {
+            case "htm", "html", "jsp", "asp", "aspx", "xhtml" -> HttpHeadValueType.Html;
+            case "css" -> HttpHeadValueType.CSS;
+            case "js" -> HttpHeadValueType.Javascript;
+            case "xml" -> HttpHeadValueType.Xml;
+            case "json" -> HttpHeadValueType.Json;
+            case "xjson" -> HttpHeadValueType.XJson;
+            case "ico" -> HttpHeadValueType.ICO;
+            case "icon" -> HttpHeadValueType.ICON;
+            case "gif" -> HttpHeadValueType.GIF;
+            case "jpg", "jpe", "jpeg" -> HttpHeadValueType.JPG;
+            case "png" -> HttpHeadValueType.PNG;
+            default -> HttpHeadValueType.OctetStream;
+        };
     }
 
 

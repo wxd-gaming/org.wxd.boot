@@ -200,7 +200,11 @@ public class FileUtil implements Serializable {
 
     /** 获取扩展名 */
     public static String extendName(File file) {
-        String fileName = file.getName();
+        return extendName(file.getName());
+    }
+
+    /** 获取扩展名 */
+    public static String extendName(String fileName) {
         int indexOf = fileName.indexOf(".");
         return fileName.substring(indexOf + 1);
     }
