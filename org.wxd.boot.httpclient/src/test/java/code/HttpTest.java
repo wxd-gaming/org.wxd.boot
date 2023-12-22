@@ -3,6 +3,7 @@ package code;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.wxd.boot.collection.ObjMap;
+import org.wxd.boot.httpclient.HttpHeadValueType;
 import org.wxd.boot.httpclient.url.HttpBuilder;
 import org.wxd.boot.threading.Executors;
 import org.wxd.boot.threading.IExecutorServices;
@@ -19,6 +20,11 @@ import java.util.concurrent.atomic.AtomicLong;
  **/
 @Slf4j
 public class HttpTest {
+
+    @Test
+    public void t9() {
+        System.out.println(HttpHeadValueType.findContentType("/js/bootstrap.min.js?v=3.3.5"));
+    }
 
     @Test
     public void r() throws Exception {

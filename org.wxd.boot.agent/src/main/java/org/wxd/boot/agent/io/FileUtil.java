@@ -205,8 +205,12 @@ public class FileUtil implements Serializable {
 
     /** 获取扩展名 */
     public static String extendName(String fileName) {
-        int indexOf = fileName.indexOf(".");
-        return fileName.substring(indexOf + 1);
+        int indexOf = fileName.indexOf("?");
+        if (indexOf >= 0) {
+            fileName = fileName.substring(0, indexOf);
+        }
+        fileName = fileName.substring(fileName.lastIndexOf(".") + 1);
+        return fileName;
     }
 
     public static boolean exists(String fileName) {
