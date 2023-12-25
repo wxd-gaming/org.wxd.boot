@@ -6,15 +6,20 @@
     <parent>
         <groupId>org.wxd</groupId>
         <artifactId>org.wxd</artifactId>
-        <version>wxd-j17-01</version>
+        <version>wxd-j21-01</version>
     </parent>
 
-    <artifactId>org.wxd.boot.httpclient</artifactId>
+    <artifactId>org.wxd.boot.httpclient.jdk</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.wxd</groupId>
             <artifactId>org.wxd.boot</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wxd</groupId>
+            <artifactId>org.wxd.boot.httpclient</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -25,7 +30,7 @@
     </dependencies>
 
     <build>
-        <finalName>httpclient</finalName>
+        <finalName>httpclient-jdk</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
