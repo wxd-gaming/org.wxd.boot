@@ -26,8 +26,15 @@ public class Flux<T> {
         this.completableFuture = completableFuture;
     }
 
+    /** 创建数据 */
+    public static <U> Flux<U> create(Collection<U> u) {
+        Flux<U> flux = new Flux<>(new CompletableFuture<>());
+        flux.completableFuture.complete(u);
+        return flux;
+    }
+
     /** 创建异步获取数据 */
-    public static <U> Flux<U> create(Supplier<Collection<U>> supplier) {
+    public static <U> Flux<U> createAsync(Supplier<Collection<U>> supplier) {
         return new Flux<>(CompletableFuture.supplyAsync(supplier));
     }
 

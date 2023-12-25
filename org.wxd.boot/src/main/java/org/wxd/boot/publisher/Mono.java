@@ -23,8 +23,15 @@ public class Mono<T> {
         this.completableFuture = completableFuture;
     }
 
+    /** 创建数据 */
+    public static <U> Mono<U> create(U u) {
+        Mono<U> uMono = new Mono<>(new CompletableFuture<>());
+        uMono.completableFuture.complete(u);
+        return uMono;
+    }
+
     /** 创建异步获取数据 */
-    public static <U> Mono<U> create(Supplier<U> supplier) {
+    public static <U> Mono<U> createAsync(Supplier<U> supplier) {
         return new Mono<>(CompletableFuture.supplyAsync(supplier));
     }
 
@@ -63,6 +70,7 @@ public class Mono<T> {
         }));
     }
 
+    /** 当完成之后 自定判定内容是否 null 异常 */
     public Mono<T> whenComplete(BiConsumer<? super T, ? super Throwable> action) {
         return new Mono<>(completableFuture.whenComplete(action));
     }

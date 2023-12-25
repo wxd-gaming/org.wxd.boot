@@ -71,6 +71,15 @@ public interface IExecutorServices extends Executor {
         return submit(queueName, runnable, 3);
     }
 
+    /** 普通任务 */
+    default Job submit(Runnable runnable, int stackTrace) {
+        String queueName = null;
+        if (runnable instanceof EventRunnable eventRunnable) {
+            queueName = eventRunnable.getQueueName();
+        }
+        return submit(queueName, runnable, stackTrace);
+    }
+
     /** 队列任务 */
     default Job submit(String queueName, Runnable command) {
         return submit(queueName, command, 3);
