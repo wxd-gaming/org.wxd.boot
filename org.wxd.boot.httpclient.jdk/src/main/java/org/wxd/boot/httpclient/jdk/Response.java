@@ -3,7 +3,8 @@ package org.wxd.boot.httpclient.jdk;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.agent.zip.GzipUtil;
-import org.wxd.boot.httpclient.HttpHeadNameType;
+import org.wxd.boot.http.HttpHeadNameType;
+import org.wxd.boot.lang.SyncJson;
 import org.wxd.boot.str.StringUtil;
 
 import java.net.http.HttpResponse;
@@ -26,7 +27,6 @@ public final class Response<H extends HttpBase> {
     final H httpBase;
     final String uriPath;
     String postText = null;
-    StackTraceElement[] threadStackTrace = null;
     HttpResponse<byte[]> httpResponse;
 
     Response(H httpBase, String uriPath) {
@@ -60,6 +60,14 @@ public final class Response<H extends HttpBase> {
 
     public String bodyString(Charset charset) {
         return new String(body(), charset);
+    }
+
+    public SyncJson bodySyncJson() {
+        return bodySyncJson(StandardCharsets.UTF_8);
+    }
+
+    public SyncJson bodySyncJson(Charset charset) {
+        return SyncJson.parse(bodyString(charset));
     }
 
     public String bodyUnicodeDecodeString() {

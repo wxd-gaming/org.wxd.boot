@@ -2,12 +2,12 @@ package org.wxd.boot.httpclient.jdk;
 
 import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.agent.exception.Throw;
-import org.wxd.boot.httpclient.HttpHeadNameType;
-import org.wxd.boot.httpclient.HttpHeadValueType;
+import org.wxd.boot.http.HttpHeadNameType;
+import org.wxd.boot.http.HttpHeadValueType;
 import org.wxd.boot.lang.SyncJson;
+import org.wxd.boot.publisher.Mono;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
-import org.wxd.boot.threading.Executors;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -45,6 +44,9 @@ public abstract class HttpBase<H extends HttpBase> {
     /** 重试状态 */
     protected int retry = 1;
     protected final Response<H> response;
+    protected StackTraceElement[] stackTraceElements;
+    protected final CompletableFuture<Response<H>> responseCompletableFuture;
+    protected final Mono<Response<H>> mono;
 
     protected HttpBase(HttpClient httpClient, String url) {
         this.httpClient = httpClient;
@@ -58,6 +60,9 @@ public abstract class HttpBase<H extends HttpBase> {
         header(HttpHeadNameType.Accept_Encoding, HttpHeadValueType.Gzip);
         header("user-agent", "java.org.wxd j21");
         response = new Response(this, url);
+
+        responseCompletableFuture = new CompletableFuture<>();
+        mono = new Mono<>(responseCompletableFuture);
     }
 
     protected HttpRequest.Builder builder() {
@@ -66,18 +71,41 @@ public abstract class HttpBase<H extends HttpBase> {
                 .timeout(Duration.ofMillis(timeout));
     }
 
-    public Response<H> request() {
+    public Mono<Response<H>> async() {
+        return sendAsync(3);
+    }
+
+    public Mono<String> asyncString() {
+        return sendAsync(3).map(httpResponse -> new String(httpResponse.body(), StandardCharsets.UTF_8));
+    }
+
+    public void asyncString(Consumer<String> consumer) {
+        sendAsync(3).subscribe(httpResponse -> consumer.accept(new String(httpResponse.body(), StandardCharsets.UTF_8)));
+    }
+
+    public Mono<SyncJson> asyncSyncJson() {
+        return sendAsync(3).map(httpResponse -> SyncJson.parse(new String(httpResponse.body(), StandardCharsets.UTF_8)));
+    }
+
+    public void asyncSyncJson(Consumer<SyncJson> consumer) {
+        sendAsync(3)
+                .subscribe(httpResponse -> consumer.accept(SyncJson.parse(new String(httpResponse.body(), StandardCharsets.UTF_8))))
+                .onError(this::actionThrowable);
+    }
+
+    Mono<Response<H>> sendAsync(int stackTraceIndex) {
+
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        stackTraceElements = new StackTraceElement[stackTrace.length - stackTraceIndex];
+        System.arraycopy(stackTrace, stackTraceIndex, stackTraceElements, 0, stackTraceElements.length);
+
         HttpRequest.Builder builder = builder();
-
         builder.version(HttpClient.Version.HTTP_1_1);
-
         for (Map.Entry<String, String> stringEntry : headers.entrySet()) {
             builder.setHeader(stringEntry.getKey(), stringEntry.getValue());
         }
-
         header("connection", "close");
-
-        HttpRequest build = builder.build();
+        HttpRequest httpRequest = builder.build();
 
         if (log.isDebugEnabled()) {
             log.debug(this.getClass().getSimpleName() + " " + this.response.uriPath);
@@ -90,91 +118,25 @@ public abstract class HttpBase<H extends HttpBase> {
             }
         }
 
-        Exception exception = null;
-        for (int i = 0; i < retry; i++) {
-            try {
-                response.httpResponse = httpClient.send(build, HttpResponse.BodyHandlers.ofByteArray());
-                return response;
-            } catch (Exception e) {
-                exception = e;
-            }
-        }
-        throw Throw.as(this.getClass().getSimpleName() + " 重试次数：" + retry + ", url:" + url(), exception);
+        action(httpRequest, 1);
+        return mono;
     }
 
-    protected CompletableFuture<Response<H>> completableFuture() {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        response.threadStackTrace = new StackTraceElement[stackTrace.length - 1];
-        System.arraycopy(stackTrace, 1, response.threadStackTrace, 0, response.threadStackTrace.length);
-        return CompletableFuture.supplyAsync(() -> {
-            this.request();
-            return response;
-        });
-    }
-
-    public void asyncBySyncJson(Consumer<SyncJson> ok) {
-        async(httpBase -> ok.accept(SyncJson.parse(httpBase.bodyUnicodeDecodeString())));
-    }
-
-    public void asyncByString(Consumer<String> ok) {
-        async(jPostText -> ok.accept(jPostText.bodyUnicodeDecodeString()));
-    }
-
-    public void asyncComplete(Consumer<Response<H>> complete) {
-        async(null, complete);
-    }
-
-    public void async(Consumer<Response<H>> ok) {
-        async(ok, null);
-    }
-
-    public void async(Consumer<Response<H>> ok, Consumer<Response<H>> complete) {
-        async(ok, complete, this::actionThrowable);
-    }
-
-    /** 异步完成， */
-    public CompletableFuture<Response<H>> async(Consumer<Response<H>> ok, Consumer<Response<H>> complete, Consumer<Throwable> error) {
-        return completableFuture()
-                .thenApply(r -> {
-                    if (ok != null) {
-                        try {
-                            ok.accept(r);
-                        } catch (Throwable throwable) {
-                            if (error == null) {
-                                this.actionThrowable(throwable);
-                            } else {
-                                error.accept(throwable);
-                            }
+    void action(HttpRequest httpRequest, int action) {
+        httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
+                .whenComplete((httpResponse, throwable) -> {
+                    if (throwable != null) {
+                        if (action < retry) {
+                            action(httpRequest, action + 1);
+                        } else {
+                            RuntimeException runtimeException = Throw.as(HttpBase.this.toString() + ", 重试：" + action, throwable);
+                            runtimeException.setStackTrace(stackTraceElements);
+                            this.responseCompletableFuture.completeExceptionally(runtimeException);
                         }
-                    }
-                    return r;
-                })
-                .whenComplete((response, throwable) -> {
-                    if (complete != null) {
-                        try {
-                            complete.accept(response);
-                        } catch (Throwable t) {
-                            if (error == null) {
-                                this.actionThrowable(t);
-                            } else {
-                                error.accept(t);
-                            }
-                        }
-                    }
-                })
-                .exceptionally(throwable -> {
-                    if (throwable instanceof CompletionException) {
-                        throwable = throwable.getCause();
-                    }
-
-                    if (error == null) {
-                        log.error("异常 {}", url(), throwable);
                     } else {
-                        RuntimeException aThrow = new Throw(throwable.toString());
-                        aThrow.setStackTrace(response.threadStackTrace);
-                        error.accept(aThrow);
+                        response.httpResponse = httpResponse;
+                        this.responseCompletableFuture.complete(response);
                     }
-                    return response;
                 });
     }
 
@@ -185,7 +147,7 @@ public abstract class HttpBase<H extends HttpBase> {
     }
 
     /** 读取超时 */
-    public H setTimeout(long timeout) {
+    public H readTimeout(long timeout) {
         this.timeout = timeout;
         return (H) this;
     }

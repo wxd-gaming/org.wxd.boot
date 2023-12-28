@@ -17,12 +17,13 @@
         <module>org.wxd.boot.batis.sql</module>
         <module>org.wxd.boot.batis.sql.mysql</module>
         <module>org.wxd.boot.batis.sql.sqlite</module>
-        <module>org.wxd.boot.httpclient</module>
-        <module>org.wxd.boot.net</module>
-        <module>org.wxd.boot.starter</module>
-        <module>org.wxd.boot.jscript</module>
-        <module>org.wxd.boot.net.http2service</module>
+        <module>org.wxd.boot.http</module>
         <module>org.wxd.boot.httpclient.jdk</module>
+        <module>org.wxd.boot.httpclient.url</module>
+        <module>org.wxd.boot.jscript</module>
+        <module>org.wxd.boot.net</module>
+        <module>org.wxd.boot.net.http2service</module>
+        <module>org.wxd.boot.starter</module>
     </modules>
 
     <properties>

@@ -1,6 +1,7 @@
 package org.wxd.boot.httpclient.jdk;
 
 import lombok.extern.slf4j.Slf4j;
+import org.wxd.boot.http.ssl.SslProtocolType;
 import org.wxd.boot.threading.Executors;
 
 import javax.net.ssl.SSLContext;
@@ -23,7 +24,7 @@ public class HttpBuilder {
 
     static {
         try {
-            SSLContext tls = SSLContext.getInstance("tls");
+            SSLContext tls = SSLContext.getInstance(SslProtocolType.SSL.getTypeName());
             X509TrustManager tm = new X509TrustManager() {
                 public X509Certificate[] getAcceptedIssuers() {return null;}
 
@@ -37,7 +38,7 @@ public class HttpBuilder {
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .connectTimeout(Duration.ofMillis(3000))
                     .sslContext(tls)
-                    .executor(Executors.getLogicExecutor())
+                    //.executor(Executors.getVTExecutor())
 //                .proxy(ProxySelector.of(new InetSocketAddress("proxy.example.com", 80)))
 //                .authenticator(Authenticator.getDefault())
                     .build();

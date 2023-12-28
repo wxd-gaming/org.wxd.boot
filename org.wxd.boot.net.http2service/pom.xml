@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wxd</groupId>
-            <artifactId>org.wxd.boot.httpclient</artifactId>
+            <artifactId>org.wxd.boot.http</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

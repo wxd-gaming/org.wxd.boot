@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.collection.concurrent.ConcurrentHashSet;
-import org.wxd.boot.httpclient.ssl.SslProtocolType;
+import org.wxd.boot.http.ssl.SslProtocolType;
 import org.wxd.boot.net.ssl.WxOptionalSslHandler;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.BytesUnit;

@@ -22,7 +22,7 @@ public class Flux<T> {
 
     protected CompletableFuture<Collection<T>> completableFuture;
 
-    protected Flux(CompletableFuture<Collection<T>> completableFuture) {
+    public Flux(CompletableFuture<Collection<T>> completableFuture) {
         this.completableFuture = completableFuture;
     }
 

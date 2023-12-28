@@ -2,7 +2,7 @@ package org.wxd.boot.httpclient.jdk;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.wxd.boot.httpclient.HttpHeadValueType;
+import org.wxd.boot.http.HttpHeadValueType;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
 

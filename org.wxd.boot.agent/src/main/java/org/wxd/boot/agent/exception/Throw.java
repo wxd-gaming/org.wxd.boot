@@ -68,29 +68,35 @@ public class Throw extends RuntimeException implements Serializable {
                 stringBuilder.append(RuntimeException.class.getName());
             }
             stringBuilder.append(": ");
-            if (throwable.getMessage() != null && throwable.getMessage().length() > 0) {
+            if (throwable.getMessage() != null && !throwable.getMessage().isEmpty()) {
                 stringBuilder.append(throwable.getMessage());
             } else {
                 stringBuilder.append("null");
             }
             stringBuilder.append("\n");
-
             StackTraceElement[] stackTraces = throwable.getStackTrace();
-            for (StackTraceElement e : stackTraces) {
-                stringBuilder.append("    at ")
-                        .append(e.getClassName()).append(".").append(e.getMethodName())
-                        .append("(").append(e.getFileName()).append(":").append(e.getLineNumber()).append(")").append("\n");
-            }
+            ofString(stringBuilder, stackTraces);
             stringBuilder.append("-----------------------------------------------------------------------------");
         }
     }
 
     public static void ofString(StringBuilder stringBuilder, StackTraceElement[] stackTraces) {
         for (StackTraceElement e : stackTraces) {
-            stringBuilder.append("    at ")
-                    .append(e.getClassName()).append(".").append(e.getMethodName())
-                    .append("(").append(e.getFileName()).append(":").append(e.getLineNumber()).append(")").append("\n");
+            stringBuilder.append("    at ");
+            ofString(stringBuilder, e);
+            stringBuilder.append("\n");
         }
+    }
+
+    public static String ofString(StackTraceElement traceElement) {
+        StringBuilder stringBuilder = new StringBuilder();
+        ofString(stringBuilder, traceElement);
+        return stringBuilder.toString();
+    }
+
+    public static void ofString(StringBuilder stringBuilder, StackTraceElement traceElement) {
+        stringBuilder.append(traceElement.getClassName()).append(".").append(traceElement.getMethodName())
+                .append("(").append(traceElement.getFileName()).append(":").append(traceElement.getLineNumber()).append(")");
     }
 
     /**

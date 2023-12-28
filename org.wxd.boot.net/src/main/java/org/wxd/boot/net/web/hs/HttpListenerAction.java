@@ -11,7 +11,7 @@ import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.io.FileUtil;
 import org.wxd.boot.agent.system.AnnUtil;
 import org.wxd.boot.collection.ObjMap;
-import org.wxd.boot.httpclient.HttpHeadValueType;
+import org.wxd.boot.http.HttpHeadValueType;
 import org.wxd.boot.lang.RunResult;
 import org.wxd.boot.net.controller.MappingFactory;
 import org.wxd.boot.net.controller.TextMappingRecord;

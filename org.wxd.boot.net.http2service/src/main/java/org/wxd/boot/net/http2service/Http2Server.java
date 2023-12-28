@@ -17,8 +17,8 @@ import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.wxd.boot.httpclient.ssl.SslContextServer;
-import org.wxd.boot.httpclient.ssl.SslProtocolType;
+import org.wxd.boot.http.ssl.SslContextServer;
+import org.wxd.boot.http.ssl.SslProtocolType;
 import org.wxd.boot.net.ssl.WxOptionalSslHandler;
 
 import javax.net.ssl.SSLContext;

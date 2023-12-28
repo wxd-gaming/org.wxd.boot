@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.simpleframework.xml.Element;
-import org.wxd.boot.httpclient.ssl.SslContextServer;
-import org.wxd.boot.httpclient.ssl.SslProtocolType;
+import org.wxd.boot.http.ssl.SslContextServer;
+import org.wxd.boot.http.ssl.SslProtocolType;
 import org.wxd.boot.lang.ObjectBase;
 import org.wxd.boot.str.StringUtil;
 
