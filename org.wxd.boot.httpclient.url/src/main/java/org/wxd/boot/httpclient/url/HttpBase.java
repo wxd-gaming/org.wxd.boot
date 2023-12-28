@@ -195,10 +195,10 @@ public abstract class HttpBase<H extends HttpBase> {
         throw runtimeException;
     }
 
-    protected void actionThrowable(Throwable throwable) {
-        log.error("{} url:{}", this.getClass().getSimpleName(), response.uriPath, throwable);
+    public void actionThrowable(Throwable throwable) {
+        log.error("{} url:{}", this.getClass().getSimpleName(), response.toString(), throwable);
         if (retry > 1)
-            GlobalUtil.exception(this.getClass().getSimpleName() + " url:" + response.uriPath, throwable);
+            GlobalUtil.exception(this.getClass().getSimpleName() + " url:" + response.toString(), throwable);
     }
 
     /** 同时设置连接超时和读取超时时间 */

@@ -44,12 +44,4 @@ public class PostText extends HttpBase<PostText> {
         return builder;
     }
 
-    @Override protected void actionThrowable(Throwable throwable) {
-        log.error("{} url:{}, body：{}", this.getClass().getSimpleName(), uri, response.postText, throwable);
-        if (retry > 1)
-            GlobalUtil.exception(
-                    this.getClass().getSimpleName() + " url:" + uri + ", body：" + response.postText,
-                    throwable
-            );
-    }
 }

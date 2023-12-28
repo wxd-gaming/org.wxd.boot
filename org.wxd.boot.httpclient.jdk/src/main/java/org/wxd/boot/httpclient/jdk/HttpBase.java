@@ -140,7 +140,7 @@ public abstract class HttpBase<H extends HttpBase> {
                 });
     }
 
-    protected void actionThrowable(Throwable throwable) {
+    public void actionThrowable(Throwable throwable) {
         log.error("{} url:{}", this.getClass().getSimpleName(), uri, throwable);
         if (retry > 1)
             GlobalUtil.exception(this.getClass().getSimpleName() + " url:" + uri, throwable);
