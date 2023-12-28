@@ -38,17 +38,6 @@ interface RedisSet {
         return set(dbIndex, redisKey, value, 0);
     }
 
-    /** hash 类型， 当数据不存在是写入返回0， 当数据存在是不写入，返回1 */
-    default long hsetnx(final String key, final Object field, final Object value) {
-        return hsetnx(0, key, field, value);
-    }
-
-    /** hash 类型， 当数据不存在是写入返回0， 当数据存在是不写入，返回1 */
-    default long hsetnx(int dbIndex, final String redisKey, final Object field, final Object value) {
-        return ((RedisDataHelper) this)
-                .jedis(dbIndex, jedis -> jedis.hsetnx(redisKey, String.valueOf(field), String.valueOf(value)));
-    }
-
     /**
      * 设置参数
      *
@@ -85,6 +74,17 @@ interface RedisSet {
     default Long hset(int dbIndex, String redisKey, Object field, Object value) {
         return ((RedisDataHelper) this)
                 .jedis(dbIndex, jedis -> jedis.hset(redisKey, String.valueOf(field), String.valueOf(value)));
+    }
+
+    /** hash 类型， 当数据不存在是写入返回0， 当数据存在是不写入，返回1 */
+    default long hsetnx(final String key, final Object field, final Object value) {
+        return hsetnx(0, key, field, value);
+    }
+
+    /** hash 类型， 当数据不存在是写入返回0， 当数据存在是不写入，返回1 */
+    default long hsetnx(int dbIndex, final String redisKey, final Object field, final Object value) {
+        return ((RedisDataHelper) this)
+                .jedis(dbIndex, jedis -> jedis.hsetnx(redisKey, String.valueOf(field), String.valueOf(value)));
     }
 
     /**

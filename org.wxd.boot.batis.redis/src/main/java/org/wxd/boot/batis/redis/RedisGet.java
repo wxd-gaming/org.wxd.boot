@@ -18,6 +18,10 @@ interface RedisGet {
         return get(redisKey.getDbIndex(), redisKey.redisKey(redisParams));
     }
 
+    default String get(String redisKey) {
+        return get(0, redisKey);
+    }
+
     default String get(int dbIndex, String redisKey) {
         try (Jedis jedis = ((RedisDataHelper) this).getJedis(dbIndex)) {
             return jedis.get(redisKey);
@@ -48,6 +52,10 @@ interface RedisGet {
         return hget(redisKey.getDbIndex(), redisKey.redisKey(redisParams), field);
     }
 
+    default String hget(String redisKey, Object field) {
+        return hget(0, redisKey, field);
+    }
+
     default String hget(int dbIndex, String redisKey, Object field) {
         try (Jedis jedis = ((RedisDataHelper) this).getJedis(dbIndex)) {
             return jedis.hget(redisKey, String.valueOf(field));
@@ -59,10 +67,18 @@ interface RedisGet {
         return hgetAll(redisKey.getDbIndex(), redisKey.redisKey(redisParams));
     }
 
+    default Map<String, String> hgetAll(String redisKey) {
+        return hgetAll(0, redisKey);
+    }
+
     default Map<String, String> hgetAll(int dbIndex, String redisKey) {
         try (Jedis jedis = ((RedisDataHelper) this).getJedis(dbIndex)) {
             return jedis.hgetAll(redisKey);
         }
+    }
+
+    default Map<String, String> hmget(String redisKey, Object... fields) {
+        return hmget(0, redisKey, fields);
     }
 
     default Map<String, String> hmget(int dbIndex, String redisKey, Object... fields) {

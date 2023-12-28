@@ -131,6 +131,10 @@ public class RedisDataHelper extends DataHelper<EntityTable, DataWrapper<EntityT
         }
     }
 
+    public void consumerPipeline(ConsumerE1<Pipeline> consumerPipeline) {
+        consumerPipeline(0, consumerPipeline);
+    }
+
     /**
      * @param dbIndex
      * @param consumerPipeline
