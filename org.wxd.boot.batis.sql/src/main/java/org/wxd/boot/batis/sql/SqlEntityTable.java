@@ -1,6 +1,7 @@
 package org.wxd.boot.batis.sql;
 
 
+import lombok.Getter;
 import org.wxd.boot.batis.EntityTable;
 
 import java.io.Serializable;
@@ -20,10 +21,8 @@ public class SqlEntityTable extends EntityTable implements Serializable {
     protected String selectWhereSql = null;
     protected String replaceSql = null;
     protected String deleteSql = null;
-    /**
-     * 通过注解{@code Sql}获取的sql语句
-     */
-    protected LinkedHashMap<String, String> sqls = new LinkedHashMap<>();
+    /** 通过注解{@code Sql}获取的sql语句 */
+    @Getter protected LinkedHashMap<String, String> sqls = new LinkedHashMap<>();
 
     public SqlEntityTable(SqlDataWrapper dataBuilder) {
         this.dataBuilder = dataBuilder;
@@ -85,10 +84,6 @@ public class SqlEntityTable extends EntityTable implements Serializable {
             dataBuilder.newDeleteSql(this);
         }
         return filterTable(deleteSql, source);
-    }
-
-    public LinkedHashMap<String, String> getSqls() {
-        return sqls;
     }
 
 }

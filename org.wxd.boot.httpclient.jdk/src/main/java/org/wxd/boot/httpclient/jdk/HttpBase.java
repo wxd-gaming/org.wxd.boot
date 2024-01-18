@@ -5,9 +5,9 @@ import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.http.HttpHeadNameType;
 import org.wxd.boot.http.HttpHeadValueType;
 import org.wxd.boot.lang.SyncJson;
-import org.wxd.boot.publisher.Mono;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
+import org.wxd.boot.threading.OptFuture;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -45,8 +44,6 @@ public abstract class HttpBase<H extends HttpBase> {
     protected int retry = 1;
     protected final Response<H> response;
     protected StackTraceElement[] stackTraceElements;
-    protected final CompletableFuture<Response<H>> responseCompletableFuture;
-    protected final Mono<Response<H>> mono;
 
     protected HttpBase(HttpClient httpClient, String url) {
         this.httpClient = httpClient;
@@ -60,9 +57,6 @@ public abstract class HttpBase<H extends HttpBase> {
         header(HttpHeadNameType.Accept_Encoding, HttpHeadValueType.Gzip);
         header("user-agent", "java.org.wxd j21");
         response = new Response(this, url);
-
-        responseCompletableFuture = new CompletableFuture<>();
-        mono = new Mono<>(responseCompletableFuture);
     }
 
     protected HttpRequest.Builder builder() {
@@ -71,11 +65,17 @@ public abstract class HttpBase<H extends HttpBase> {
                 .timeout(Duration.ofMillis(timeout));
     }
 
-    public Mono<Response<H>> async() {
+    public OptFuture<Response<H>> async() {
         return sendAsync(3);
     }
 
-    public Mono<String> asyncString() {
+    public void async(Consumer<Response<H>> consumer) {
+        sendAsync(3)
+                .subscribe(httpResponse -> consumer.accept(httpResponse))
+                .onError(this::actionThrowable);
+    }
+
+    public OptFuture<String> asyncString() {
         return sendAsync(3).map(httpResponse -> new String(httpResponse.body(), StandardCharsets.UTF_8));
     }
 
@@ -83,7 +83,7 @@ public abstract class HttpBase<H extends HttpBase> {
         sendAsync(3).subscribe(httpResponse -> consumer.accept(new String(httpResponse.body(), StandardCharsets.UTF_8)));
     }
 
-    public Mono<SyncJson> asyncSyncJson() {
+    public OptFuture<SyncJson> asyncSyncJson() {
         return sendAsync(3).map(httpResponse -> SyncJson.parse(new String(httpResponse.body(), StandardCharsets.UTF_8)));
     }
 
@@ -93,7 +93,7 @@ public abstract class HttpBase<H extends HttpBase> {
                 .onError(this::actionThrowable);
     }
 
-    Mono<Response<H>> sendAsync(int stackTraceIndex) {
+    OptFuture<Response<H>> sendAsync(int stackTraceIndex) {
 
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         stackTraceElements = new StackTraceElement[stackTrace.length - stackTraceIndex];
@@ -117,25 +117,27 @@ public abstract class HttpBase<H extends HttpBase> {
                 log.debug("http send：" + this.response.postText);
             }
         }
-
-        action(httpRequest, 1);
-        return mono;
+        OptFuture<Response<H>> optFuture = OptFuture.empty();
+        action(optFuture, httpRequest, 1);
+        return optFuture;
     }
 
-    void action(HttpRequest httpRequest, int action) {
+    void action(OptFuture<Response<H>> optFuture, HttpRequest httpRequest, int action) {
         httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofByteArray())
                 .whenComplete((httpResponse, throwable) -> {
                     if (throwable != null) {
                         if (action < retry) {
-                            action(httpRequest, action + 1);
+                            action(optFuture, httpRequest, action + 1);
                         } else {
                             RuntimeException runtimeException = Throw.as(HttpBase.this.toString() + ", 重试：" + action, throwable);
-                            runtimeException.setStackTrace(stackTraceElements);
-                            this.responseCompletableFuture.completeExceptionally(runtimeException);
+                            if (stackTraceElements != null) {
+                                runtimeException.setStackTrace(stackTraceElements);
+                            }
+                            optFuture.completeExceptionally(runtimeException);
                         }
                     } else {
                         response.httpResponse = httpResponse;
-                        this.responseCompletableFuture.complete(response);
+                        optFuture.complete(response);
                     }
                 });
     }
@@ -183,4 +185,7 @@ public abstract class HttpBase<H extends HttpBase> {
         return uri.toString();
     }
 
+    public String getPostText() {
+        return response.getPostText();
+    }
 }

@@ -53,8 +53,8 @@ public interface IExecutorServices extends Executor {
     /** 普通任务 */
     @Override default void execute(Runnable runnable) {
         String queueName = null;
-        if (runnable instanceof EventRunnable eventRunnable) {
-            queueName = eventRunnable.getQueueName();
+        if (runnable instanceof Event event) {
+            queueName = event.getQueueName();
         }
         int stackTrace = 3;
         if (runnable instanceof ForkJoinTask)
@@ -65,8 +65,8 @@ public interface IExecutorServices extends Executor {
     /** 普通任务 */
     default Job submit(Runnable runnable) {
         String queueName = null;
-        if (runnable instanceof EventRunnable eventRunnable) {
-            queueName = eventRunnable.getQueueName();
+        if (runnable instanceof Event event) {
+            queueName = event.getQueueName();
         }
         return submit(queueName, runnable, 3);
     }
@@ -74,8 +74,8 @@ public interface IExecutorServices extends Executor {
     /** 普通任务 */
     default Job submit(Runnable runnable, int stackTrace) {
         String queueName = null;
-        if (runnable instanceof EventRunnable eventRunnable) {
-            queueName = eventRunnable.getQueueName();
+        if (runnable instanceof Event event) {
+            queueName = event.getQueueName();
         }
         return submit(queueName, runnable, stackTrace);
     }
@@ -99,100 +99,14 @@ public interface IExecutorServices extends Executor {
         return executorServiceJob;
     }
 
-    /**
-     * 提交带回调的执行
-     *
-     * @param runnable 需要执行的任务
-     * @param v        给定的返回值
-     * @param <V>
-     * @return
-     */
-    default <V> Future<V> submitCall(Runnable runnable, V v) {
-        return submitCall(runnable, v, 3);
-    }
-
-    /**
-     * 提交带回调的执行
-     *
-     * @param runnable   需要执行的任务
-     * @param v          给定的返回值
-     * @param stackTrace 记录来源堆栈层级
-     * @param <V>
-     * @return
-     */
-    default <V> Future<V> submitCall(Runnable runnable, V v, int stackTrace) {
-        FutureTask<V> task = new FutureTask<>(runnable, v);
-        ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, task, stackTrace);
-        executeJob(null, executorServiceJob);
-        return task;
+    /** 提交带回调的执行 */
+    default <V> OptFuture<V> optFuture(Supplier<V> supplier) {
+        return new OptFuture<V>(supplier, this, 5);
     }
 
     /** 提交带回调的执行 */
-    default <V> Future<V> submitCall(Callable<V> callable) {
-        return submitCall(callable, 3);
-    }
-
-    /**
-     * 提交带回调的执行
-     *
-     * @param callable   执行带回调等待
-     * @param stackTrace 记录来源堆栈层级
-     * @param <V>
-     * @return
-     */
-    default <V> Future<V> submitCall(Callable<V> callable, int stackTrace) {
-        FutureTask<V> task = new FutureTask<>(callable);
-        ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, task, stackTrace);
-        executeJob(null, executorServiceJob);
-        return task;
-    }
-
-    /**
-     * 提交带回调的执行
-     *
-     * @param queueName 队列名称
-     * @param runnable  需要执行的任务
-     * @param v         给定的返回值
-     * @param <V>
-     * @return
-     */
-    default <V> Future<V> submitCall(String queueName, Runnable runnable, V v) {
-        return submitCall(queueName, runnable, v, 3);
-    }
-
-    /**
-     * 提交带回调的执行
-     *
-     * @param queueName  队列名称
-     * @param runnable   需要执行的任务
-     * @param v          给定的返回值
-     * @param stackTrace 堆栈层级
-     * @param <V>
-     * @return
-     */
-    default <V> Future<V> submitCall(String queueName, Runnable runnable, V v, int stackTrace) {
-        FutureTask<V> task = new FutureTask<>(runnable, v);
-        ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, task, stackTrace);
-        executeJob(queueName, executorServiceJob);
-        return task;
-    }
-
-    /** 提交带回调的执行 */
-    default <V> Future<V> submitCall(String queueName, Callable<V> callable) {
-        return submitCall(queueName, callable, 3);
-    }
-
-    /** 提交带回调的执行 */
-    default <V> Future<V> submitCall(String queueName, Callable<V> callable, int stackTrace) {
-        FutureTask<V> task = new FutureTask<>(callable);
-        ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, task, stackTrace);
-        executeJob(queueName, executorServiceJob);
-        return task;
-    }
-
-    /** 提交带回调的执行 */
-    default <V> CompletableFuture<V> completableFuture(Supplier<V> supplier) {
-        return CompletableFuture.supplyAsync(supplier, this);
+    default <V> OptFuture<V> optFuture(Supplier<V> supplier, int stackTrace) {
+        return new OptFuture<V>(supplier, this, stackTrace);
     }
 
     /** 提交带回调的执行 */
@@ -208,8 +122,8 @@ public interface IExecutorServices extends Executor {
     /** 执行一次的延时任务 */
     default TimerJob schedule(Runnable command, long delay, TimeUnit unit, int stackTrace) {
         String queueName = null;
-        if (command instanceof EventRunnable eventRunnable) {
-            queueName = eventRunnable.getQueueName();
+        if (command instanceof Event event) {
+            queueName = event.getQueueName();
         }
         ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, command, stackTrace);
         TimerJob timerJob = new TimerJob(this, queueName, executorServiceJob, delay, delay, unit, 1);
@@ -228,8 +142,8 @@ public interface IExecutorServices extends Executor {
     /** 定时运行可取消的周期性任务 上一次没有执行，不会执行第二次，等待上一次执行完成 */
     default TimerJob scheduleAtFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
         String queueName = null;
-        if (command instanceof EventRunnable eventRunnable) {
-            queueName = eventRunnable.getQueueName();
+        if (command instanceof Event event) {
+            queueName = event.getQueueName();
         }
         ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, command, 2);
         TimerJob timerJob = new TimerJob(this, queueName, executorServiceJob, initialDelay, delay, unit, -1);
@@ -244,8 +158,8 @@ public interface IExecutorServices extends Executor {
 
     default TimerJob scheduleAtFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit, int execCount, int stackTrace) {
         String queueName = null;
-        if (command instanceof EventRunnable eventRunnable) {
-            queueName = eventRunnable.getQueueName();
+        if (command instanceof Event event) {
+            queueName = event.getQueueName();
         }
         ExecutorServiceJob executorServiceJob = new ExecutorServiceJob(this, command, stackTrace);
         TimerJob timerJob = new TimerJob(this, queueName, executorServiceJob, initialDelay, delay, unit, execCount);

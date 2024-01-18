@@ -1,13 +1,13 @@
 package org.wxd.boot.publisher;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.wxd.boot.threading.Executors;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.*;
 import java.util.stream.Stream;
 
@@ -17,6 +17,7 @@ import java.util.stream.Stream;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2023-12-21 09:34
  **/
+@Slf4j
 @Getter
 public class Flux<T> {
 
@@ -35,7 +36,7 @@ public class Flux<T> {
 
     /** 创建异步获取数据 */
     public static <U> Flux<U> createAsync(Supplier<Collection<U>> supplier) {
-        return new Flux<>(CompletableFuture.supplyAsync(supplier));
+        return new Flux<>(CompletableFuture.supplyAsync(supplier, Executors.getVTExecutor()));
     }
 
     /** 当未查找到数据，并且无异常的情况下，赋值给定值 */
@@ -73,6 +74,16 @@ public class Flux<T> {
         }));
     }
 
+    /** 循环处理 */
+    public Flux<T> peek(Consumer<T> consumer) {
+        return new Flux<>(completableFuture.thenApply(ts -> {
+            if (ts != null) {
+                ts.forEach(consumer);
+            }
+            return ts;
+        }));
+    }
+
     /** 消费订阅 */
     public Flux<T> subscribe(Consumer<T> consumer) {
         return new Flux<>(completableFuture.thenApply(ts -> {
@@ -88,6 +99,11 @@ public class Flux<T> {
     }
 
     /** 增加异常处理 */
+    public Flux<T> onError() {
+        return onError(throwable -> {log.info("", throwable);});
+    }
+
+    /** 增加异常处理 */
     public Flux<T> onError(Consumer<Throwable> consumer) {
         return new Flux<>(completableFuture.exceptionally((throwable) -> {
             consumer.accept(throwable);
@@ -95,11 +111,25 @@ public class Flux<T> {
         }));
     }
 
-    public Collection<T> get() throws ExecutionException, InterruptedException {
-        return completableFuture.get();
+    public Collection<T> orElse(Collection<T> ts) {
+        Collection<T> ts1 = get();
+        if (ts1 != null) return ts1;
+        return ts;
     }
 
-    public Collection<T> get(long timeout, TimeUnit unit) throws ExecutionException, InterruptedException, TimeoutException {
-        return completableFuture.get(timeout, unit);
+    public Collection<T> get() {
+        try {
+            return completableFuture.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Collection<T> get(long timeout, TimeUnit unit) {
+        try {
+            return completableFuture.get(timeout, unit);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

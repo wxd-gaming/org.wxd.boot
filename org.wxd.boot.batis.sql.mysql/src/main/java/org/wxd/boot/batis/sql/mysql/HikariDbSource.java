@@ -25,9 +25,13 @@ public class HikariDbSource extends DbSource {
         config.setPassword(DB_PASSWORD);
         config.setAutoCommit(false);
         config.setPoolName("wxd.db");
+        config.setConnectionTimeout(2000);
+        config.setIdleTimeout(TimeUnit.MINUTES.toMillis(10));
+        config.setValidationTimeout(TimeUnit.SECONDS.toMillis(10));
         config.setKeepaliveTime(TimeUnit.MINUTES.toMillis(3));/*连接存活时间，这个值必须小于 maxLifetime 值。*/
         config.setMaxLifetime(TimeUnit.MINUTES.toMillis(6));/*池中连接最长生命周期。*/
-        config.setMaximumPoolSize(4);/*池中最大连接数，包括闲置和使用中的连接。默认为 10*/
+        config.setMinimumIdle(6);/*池中最小空闲连接数，包括闲置和使用中的连接。*/
+        config.setMaximumPoolSize(20);/*池中最大连接数，包括闲置和使用中的连接。*/
         config.setConnectionTestQuery("SELECT 1");
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");

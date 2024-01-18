@@ -7,6 +7,7 @@ import java.lang.annotation.*;
  */
 @Documented
 @Target({
+        ElementType.TYPE,
         ElementType.METHOD, /*方法*/
         ElementType.LOCAL_VARIABLE/*局部变量*/
 })

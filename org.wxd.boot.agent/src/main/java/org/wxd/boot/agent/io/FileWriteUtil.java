@@ -4,13 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.agent.function.ConsumerE1;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.File;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -25,14 +25,13 @@ public class FileWriteUtil implements Serializable {
      *
      * @param fileName 文件
      * @param content  内容
-     * @throws IOException
      */
     public static void writeString(String fileName, String content) {
         writeString(fileName, content, false);
     }
 
     public static void writeString(String fileName, String content, boolean append) {
-        File file = FileUtil.file(fileName);
+        File file = new File(fileName);
         writeString(file, content, append);
     }
 
@@ -41,7 +40,6 @@ public class FileWriteUtil implements Serializable {
      *
      * @param file    文件
      * @param content 内容
-     * @throws IOException
      */
     public static void writeString(File file, String content) {
         writeString(file, content, false);
@@ -56,10 +54,9 @@ public class FileWriteUtil implements Serializable {
      *
      * @param fileName 文件
      * @param bytes    内容
-     * @throws IOException
      */
     public static void writeBytes(String fileName, byte[] bytes) {
-        final File file = FileUtil.file(fileName);
+        final File file = new File(fileName);
         writeBytes(file, bytes);
     }
 
@@ -68,7 +65,6 @@ public class FileWriteUtil implements Serializable {
      *
      * @param file  文件
      * @param bytes 内容
-     * @throws IOException
      */
     public static void writeBytes(File file, byte[] bytes) {
         writeBytes(file, bytes, false);
@@ -80,7 +76,6 @@ public class FileWriteUtil implements Serializable {
      * @param file   文件
      * @param bytes  内容
      * @param append 是否追加
-     * @throws IOException
      */
     public static void writeBytes(File file, byte[] bytes, boolean append) {
         fileOutputStream(
@@ -117,23 +112,8 @@ public class FileWriteUtil implements Serializable {
         try (OutputStream out = Files.newOutputStream(file.toPath(), openOptions)) {
             call.accept(out);
         } catch (Exception e) {
-             throw Throw.as(e);
+            throw Throw.as(e);
         }
-    }
-
-    public static void fileWriter(File file, boolean append, Charset charset, ConsumerE1<BufferedWriter> call) {
-        FileUtil.mkdirs(file);
-        fileOutputStream(
-                file,
-                append,
-                (outputStream -> {
-                    try (OutputStreamWriter isr = new OutputStreamWriter(outputStream, charset)) {
-                        try (BufferedWriter buffered = new BufferedWriter(isr)) {
-                            call.accept(buffered);
-                        }
-                    }
-                })
-        );
     }
 
     /**
@@ -141,7 +121,6 @@ public class FileWriteUtil implements Serializable {
      *
      * @param outPath
      * @param stringMap
-     * @throws IOException
      */
     public static void writeClassFile(String outPath, Map<String, byte[]> stringMap) {
         final File file_dir = new File(outPath);
@@ -159,9 +138,8 @@ public class FileWriteUtil implements Serializable {
      *
      * @param file
      * @param outPath
-     * @throws Exception
      */
-    public static void copy(String file, String outPath) throws Exception {
+    public static void copy(String file, String outPath) {
         File file1 = FileUtil.findFile(file);
         copy(file1, outPath);
     }
@@ -171,9 +149,8 @@ public class FileWriteUtil implements Serializable {
      *
      * @param file
      * @param outPath
-     * @throws Exception
      */
-    public static void copy(File file, String outPath) throws Exception {
+    public static void copy(File file, String outPath) {
         byte[] bytes = FileReadUtil.readBytes(file);
         writeBytes(outPath + "/" + file.getName(), bytes);
     }
@@ -183,13 +160,11 @@ public class FileWriteUtil implements Serializable {
      *
      * @param dir
      * @param outPath
-     * @throws Exception
      */
-    public static void copyDir(String dir, String outPath) throws Exception {
-        Collection<File> lists = FileUtil.lists(dir);
-        for (File list : lists) {
-            byte[] bytes = FileReadUtil.readBytes(list);
-            writeBytes(outPath + "/" + list.getName(), bytes);
-        }
+    public static void copyDir(String dir, String outPath) {
+        FileUtil.walkFiles(dir, 1).forEach(f -> {
+            byte[] bytes = FileReadUtil.readBytes(f);
+            writeBytes(outPath + "/" + f.getName(), bytes);
+        });
     }
 }

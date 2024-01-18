@@ -67,7 +67,7 @@
     <logger name="org.mongodb.driver" level="info" additivity="false"/>
 
     <!-- 生产环境下，将此级别配置为适合的级别，以免日志文件太多或影响程序性能 -->
-    <root level="DEBUG"> <!-- ERROR, WARN, INFO, DEBUG -->
+    <root level="INFO"> <!-- ERROR, WARN, INFO, DEBUG -->
         <appender-ref ref="file_error"/>
         <appender-ref ref="file_info"/>
         <!-- 生产环境将请stdout,testfile去掉 -->

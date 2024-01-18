@@ -1,8 +1,7 @@
 package org.wxd.boot.i;
 
-import org.wxd.boot.i.f.RunnableResult;
-
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  * @author: Troy.Chen(無心道, 15388152619)
@@ -24,10 +23,10 @@ public interface ILock {
         }
     }
 
-    default <R> R lockRun(RunnableResult<R> runnable) {
+    default <R> R lockRun(Supplier<R> runnable) {
         lock();
         try {
-            return runnable.run();
+            return runnable.get();
         } finally {
             unlock();
         }

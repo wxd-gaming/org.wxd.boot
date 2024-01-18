@@ -2,60 +2,47 @@ package org.wxd.boot.agent.io;
 
 
 import org.wxd.boot.agent.exception.Throw;
+import org.wxd.boot.agent.function.Consumer2;
 import org.wxd.boot.agent.function.ConsumerE1;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.agent.zip.ReadZipFile;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
+ * 文件读取
+ *
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2021-08-18 14:41
  **/
 public class FileReadUtil implements Serializable {
 
-    /**
-     * 文件夹当前下面文件内容
-     */
-    public static Map<String, byte[]> readListBytes(String file, String... suffixs) {
-        return readListBytes(FileUtil.findFile(file), suffixs);
+
+    /** 递归查找所有文件 */
+    public static Map<String, byte[]> readBytesAll(File file, String... extendNames) {
+        return readBytesStream(file, extendNames).collect(Collectors.toMap(Record2::t1, Record2::t2));
     }
 
-    /**
-     * 文件夹当前下面文件内容
-     */
-    public static Map<String, byte[]> readListBytes(File file, String... suffixs) {
-        Map<String, byte[]> bytesMap = new TreeMap<>();
-        FileUtil.findFile(
-                file,
-                false,
-                (tmpFile) -> bytesMap.put(tmpFile.getPath(), readBytes(tmpFile)),
-                suffixs
-        );
-        return bytesMap;
+    /** 递归查找所有文件 */
+    public static Stream<Record2<String, byte[]>> readBytesStream(File file, String... extendNames) {
+        return FileUtil.walkFiles(file.getPath(), extendNames)
+                .map(f -> new Record2<>(f.getPath(), readBytes(f)));
     }
 
-    /**
-     * 递归查找所有文件
-     */
-    public static Map<String, byte[]> loopReadBytes(String file, String... suffixs) {
-        return loopReadBytes(FileUtil.findFile(file), suffixs);
+    /** 递归查找所有文件 */
+    public static Map<String, byte[]> readBytesAll(String file, String... extendNames) {
+        return readBytesAll(FileUtil.findFile(file), extendNames);
     }
 
-    /**
-     * 递归查找所有文件
-     */
-    public static Map<String, byte[]> loopReadBytes(File file, String... suffixs) {
-        Map<String, byte[]> bytesMap = new TreeMap<>();
-        FileUtil.findFile(
-                file,
-                true,
-                (tmpFile) -> bytesMap.put(tmpFile.getPath(), readBytes(tmpFile)),
-                suffixs
-        );
-        return bytesMap;
+    /** 递归查找所有文件 */
+    public static void readBytesAll(File file, String[] extendNames, Consumer2<String, byte[]> call) {
+        FileUtil.walkFiles(file, extendNames)
+                .forEach(f -> call.accept(f.getPath(), readBytes(f)));
     }
 
     public static String readString(String fileName) {
@@ -63,22 +50,22 @@ public class FileReadUtil implements Serializable {
     }
 
     /** 获取jar包内资源 需要传入classloader */
-    public static String readString(String fileName, ClassLoader classLoader) {
-        return readString(fileName, StandardCharsets.UTF_8, classLoader);
+    public static String readString(ClassLoader classLoader, String fileName) {
+        return readString(classLoader, fileName, StandardCharsets.UTF_8);
     }
 
     public static String readString(String fileName, Charset charset) {
-        return readString(fileName, charset, Thread.currentThread().getContextClassLoader());
+        return readString(Thread.currentThread().getContextClassLoader(), fileName, charset);
     }
 
     /** 获取jar包内资源 需要传入classloader */
-    public static String readString(String fileName, Charset charset, ClassLoader classLoader) {
-        InputStream inputStream = FileUtil.findInputStream(fileName, classLoader);
+    public static String readString(ClassLoader classLoader, String fileName, Charset charset) {
+        Record2<String, InputStream> inputStream = FileUtil.findInputStream(classLoader, fileName);
         if (inputStream == null) {
             System.out.printf("文件 %s 查找失败\n", fileName);
             return null;
         }
-        return readString(inputStream, charset);
+        return readString(inputStream.t2(), charset);
     }
 
     public static String readString(File file) {
@@ -107,12 +94,17 @@ public class FileReadUtil implements Serializable {
     }
 
     public static List<String> readLines(String fileName, Charset charset) {
-        return readLines(FileUtil.findInputStream(fileName), charset);
+        Record2<String, InputStream> inputStream = FileUtil.findInputStream(fileName);
+        if (inputStream == null) {
+            System.out.printf("文件 %s 查找失败\n", fileName);
+            return null;
+        }
+        return readLines(inputStream.t2(), charset);
     }
 
     public static List<String> readLines(InputStream fileInputStream, Charset charset) {
         List<String> lines = new ArrayList<>();
-        readLine(fileInputStream, charset, (line) -> lines.add(line));
+        readLine(fileInputStream, charset, lines::add);
         return lines;
     }
 
@@ -122,7 +114,7 @@ public class FileReadUtil implements Serializable {
 
     public static List<String> readLines(File file, Charset charset) {
         List<String> lines = new ArrayList<>();
-        readLine(file, charset, (line) -> lines.add(line));
+        readLine(file, charset, lines::add);
         return lines;
     }
 

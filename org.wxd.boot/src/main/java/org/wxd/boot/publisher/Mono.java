@@ -1,11 +1,11 @@
 package org.wxd.boot.publisher;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.wxd.boot.threading.Executors;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.*;
 
 /**
@@ -14,6 +14,7 @@ import java.util.function.*;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2023-12-21 09:34
  **/
+@Slf4j
 @Getter
 public class Mono<T> {
 
@@ -32,7 +33,7 @@ public class Mono<T> {
 
     /** 创建异步获取数据 */
     public static <U> Mono<U> createAsync(Supplier<U> supplier) {
-        return new Mono<>(CompletableFuture.supplyAsync(supplier));
+        return new Mono<>(CompletableFuture.supplyAsync(supplier, Executors.getVTExecutor()));
     }
 
     /** 当未查找到数据，并且无异常的情况下，赋值给定值 */
@@ -76,6 +77,11 @@ public class Mono<T> {
     }
 
     /** 增加异常处理 */
+    public Mono<T> onError() {
+        return onError(throwable -> {log.info("", throwable);});
+    }
+
+    /** 增加异常处理 */
     public Mono<T> onError(Consumer<Throwable> consumer) {
         return new Mono<>(completableFuture.exceptionally((throwable) -> {
             consumer.accept(throwable);
@@ -83,12 +89,30 @@ public class Mono<T> {
         }));
     }
 
-    public T get() throws ExecutionException, InterruptedException {
-        return completableFuture.get();
+    public boolean isEmpty() {
+        return get() == null;
     }
 
-    public T get(long timeout, TimeUnit unit) throws ExecutionException, InterruptedException, TimeoutException {
-        return completableFuture.get(timeout, unit);
+    public T orElse(T t) {
+        T t1 = get();
+        if (t1 != null) return t1;
+        return t;
+    }
+
+    public T get() {
+        try {
+            return completableFuture.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public T get(long timeout, TimeUnit unit) {
+        try {
+            return completableFuture.get(timeout, unit);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

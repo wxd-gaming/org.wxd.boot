@@ -1,4 +1,4 @@
-package org.wxd.boot.lang;
+package org.wxd.boot.system;
 
 import java.io.Serializable;
 

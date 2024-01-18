@@ -1,18 +1,23 @@
 package org.wxd.boot.struct;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import straightedge.geom.Vector3;
 
 import java.io.Serializable;
 
 /**
- * <br>
- * author 失足程序员<br>
- * blog http://www.cnblogs.com/shizuchengxuyuan/<br>
- * mail 492794628@qq.com<br>
- * phone 13882122019<br>
+ * 测定
+ *
+ * @author: Troy.Chen(無心道, 15388152619)
+ * @version: 2023-12-04 19:23
  */
 @Slf4j
+@Getter
+@Setter
+@Accessors(chain = true)
 public abstract class Check implements Serializable {
 
     private volatile long id = 0;
@@ -24,38 +29,6 @@ public abstract class Check implements Serializable {
     }
 
     public Check(Vector3 center) {
-        this.center = center.clone();
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Vector3 getTranslation() {
-        return translation;
-    }
-
-    public void setTranslation(Vector3 translation) {
-        this.translation = translation;
-    }
-
-    public int getTranslationCount() {
-        return translationCount;
-    }
-
-    public void setTranslationCount(int translationCount) {
-        this.translationCount = translationCount;
-    }
-
-    public Vector3 getCenter() {
-        return center;
-    }
-
-    protected void setCenter(Vector3 center) {
         this.center = center.clone();
     }
 

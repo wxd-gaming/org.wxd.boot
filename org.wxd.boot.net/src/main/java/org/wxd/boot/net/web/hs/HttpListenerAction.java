@@ -9,6 +9,7 @@ import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.agent.function.Consumer2;
 import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.io.FileUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.agent.system.AnnUtil;
 import org.wxd.boot.collection.ObjMap;
 import org.wxd.boot.http.HttpHeadValueType;
@@ -22,7 +23,7 @@ import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.str.json.FastJsonUtil;
 import org.wxd.boot.system.GlobalUtil;
 import org.wxd.boot.threading.Async;
-import org.wxd.boot.threading.EventRunnable;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.threading.ExecutorLog;
 import org.wxd.boot.timer.MyClock;
 
@@ -40,7 +41,7 @@ import java.util.Optional;
  * @version: 2023-12-18 19:38
  **/
 @Slf4j
-class HttpListenerAction extends EventRunnable {
+class HttpListenerAction extends Event {
 
     protected HttpServer httpServer;
     protected HttpSession session;
@@ -109,7 +110,7 @@ class HttpListenerAction extends EventRunnable {
             };
 
             if (urlCmd == null) {
-                callBack.accept("命令参数 cmd , 未找到", true);
+                callBack.accept("命令参数 cmd , 未找到", false);
                 return;
             }
 
@@ -120,9 +121,9 @@ class HttpListenerAction extends EventRunnable {
                     return;
                 }
                 if ((httpHeadValueType == HttpHeadValueType.Json)) {
-                    callBack.accept(RunResult.error(999, " 软件：無心道  \n not found url " + urlPath), true);
+                    callBack.accept(RunResult.error(999, " 软件：無心道  \n not found url " + urlPath), false);
                 } else {
-                    callBack.accept(" 软件：無心道  \n not found url " + urlPath, true);
+                    callBack.accept(" 软件：無心道  \n not found url " + urlPath, false);
                 }
                 return;
             }
@@ -133,9 +134,9 @@ class HttpListenerAction extends EventRunnable {
             if (post != null || get != null) {
                 Runnable action = () -> {
                     if ((httpHeadValueType == HttpHeadValueType.Json)) {
-                        callBack.accept(RunResult.error(999, " 软件：無心道  \n server 500"), true);
+                        callBack.accept(RunResult.error(999, " 软件：無心道  \n server 500"), false);
                     } else {
-                        callBack.accept(" 软件：無心道  \n server 500", true);
+                        callBack.accept(" 软件：無心道  \n server 500", false);
                     }
                 };
                 if (post != null && get != null) {
@@ -163,13 +164,13 @@ class HttpListenerAction extends EventRunnable {
                 if (mappingRecord.instance() instanceof HttpSignCheck signCheck) {
                     String s = signCheck.checkSign(mappingRecord.method(), session, putData);
                     if (StringUtil.notEmptyOrNull(s)) {
-                        callBack.accept("权限认证失败", true);
+                        callBack.accept("权限认证失败", false);
                         return;
                     }
                 } else if (mappingRecord.textMapping().needAuth() > 0) {
                     String s = HttpSignCheck.checkAuth(mappingRecord.method(), session, putData);
                     if (StringUtil.notEmptyOrNull(s)) {
-                        callBack.accept("权限认证失败", true);
+                        callBack.accept("权限认证失败", false);
                         return;
                     }
                 }
@@ -223,18 +224,14 @@ class HttpListenerAction extends EventRunnable {
         String htmlPath = httpServer.resourcesPath() + session.getUriPath();
         try {
             byte[] readFileToBytes = null;
-            InputStream resource = FileUtil.findInputStream(htmlPath, httpServer.getResourceClassLoader());
-            if (resource == null) {
+            Record2<String, InputStream> inputStream = FileUtil.findInputStream(httpServer.getResourceClassLoader(), htmlPath);
+            if (inputStream == null) {
                 htmlPath = "html" + session.getUriPath();
-                resource = FileUtil.findInputStream(htmlPath, httpServer.getResourceClassLoader());
+                inputStream = FileUtil.findInputStream(httpServer.getResourceClassLoader(), htmlPath);
             }
 
-            if (resource != null) {
-                try {
-                    readFileToBytes = FileReadUtil.readBytes(resource);
-                } finally {
-                    resource.close();
-                }
+            if (inputStream != null) {
+                readFileToBytes = FileReadUtil.readBytes(inputStream.t2());
             }
             if (readFileToBytes != null) {
                 String extendName = htmlPath.substring(htmlPath.lastIndexOf(".") + 1).toLowerCase();
@@ -255,7 +252,8 @@ class HttpListenerAction extends EventRunnable {
                             .append("\nfile path = ").append(new File(htmlPath).getCanonicalPath())
                             .append("\n=============================================结束================================================")
                             .append("\n");
-                    session.setShowLog(true);
+                    session.setShowLog(false);
+                    session.setFile(true);
                 }
                 HttpServer.response(session, HttpVersion.HTTP_1_1, HttpResponseStatus.OK, hct, readFileToBytes);
                 return true;

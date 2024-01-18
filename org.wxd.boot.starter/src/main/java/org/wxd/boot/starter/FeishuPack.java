@@ -10,7 +10,7 @@ import org.wxd.boot.str.json.FastJsonUtil;
 import org.wxd.boot.system.JvmUtil;
 import org.wxd.boot.system.LocalHostUtil;
 import org.wxd.boot.system.ThrowableCache;
-import org.wxd.boot.threading.EventRunnable;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.threading.Executors;
 
 import java.util.LinkedList;
@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @version: 2022-12-20 15:38
  **/
 @Slf4j
-public class FeishuPack extends EventRunnable {
+public class FeishuPack extends Event {
 
     public static final FeishuPack Default = new FeishuPack();
     protected final ReentrantLock relock = new ReentrantLock();

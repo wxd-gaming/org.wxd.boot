@@ -8,6 +8,7 @@ import org.wxd.boot.lang.Tuple2;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,8 +85,7 @@ interface SqlExecute<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> e
                         stmt.clearParameters();
                     }
                     final int[] ints = stmt.executeBatch();
-                    final long sum = Arrays.stream(ints).mapToLong(v -> v).sum();
-                    return sum;
+                    return Arrays.stream(ints).mapToLong(v -> v).sum();
                 },
                 sqlString
         );
@@ -154,8 +154,7 @@ interface SqlExecute<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> e
      * @param rowCall   返回 true 表现继续查询
      */
     default void queryResultSet(String sqlString, Object[] params, PredicateE<ResultSet> rowCall) {
-        stmtFun(
-                (stmt) -> {
+        stmtFun((stmt) -> {
                     int size = 0;
                     try (ResultSet resultSet = stmt.executeQuery()) {
                         while (resultSet.next()) {
@@ -180,7 +179,7 @@ interface SqlExecute<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> e
      * @return
      */
     default int executeUpdate(String sql, Object... args) {
-        return stmtFun(stmt -> stmt.executeUpdate(), sql, args);
+        return stmtFun(PreparedStatement::executeUpdate, sql, args);
     }
 
     /**

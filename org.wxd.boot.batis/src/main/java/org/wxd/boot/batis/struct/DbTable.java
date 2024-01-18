@@ -16,25 +16,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DbTable {
 
-    /**
-     * 映射表 默认否
-     *
-     * @return
-     */
+    /** 映射表 默认否 */
     public boolean mappedSuperclass() default false;
 
-    /**
-     * 映射名字
-     *
-     * @return
-     */
+    /** 映射名字 */
     public String name() default "";
 
-    /**
-     * 大于1表示需要拆分表
-     *
-     * @return
-     */
+    /** 大于1表示需要拆分表 */
     public int splitTable() default 0;
 
     /**

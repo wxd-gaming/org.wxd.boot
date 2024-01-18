@@ -9,7 +9,7 @@ import org.wxd.boot.collection.ConvertCollection;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
 import org.wxd.boot.system.MarkTimer;
-import org.wxd.boot.threading.EventRunnable;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.threading.Executors;
 import org.wxd.boot.threading.IExecutorServices;
 
@@ -96,7 +96,7 @@ public abstract class BatchPool implements AutoCloseable {
 
     volatile long lastTime = System.currentTimeMillis();
 
-    protected class Batch_Work extends EventRunnable implements AutoCloseable {
+    protected class Batch_Work extends Event implements AutoCloseable {
 
         @Getter
         protected IExecutorServices executorServices;

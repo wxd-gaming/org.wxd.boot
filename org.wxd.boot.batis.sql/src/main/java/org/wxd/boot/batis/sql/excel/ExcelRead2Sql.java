@@ -1,7 +1,6 @@
 package org.wxd.boot.batis.sql.excel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.agent.io.TemplatePack;
 import org.wxd.boot.append.StreamWriter;
@@ -26,9 +25,9 @@ import java.util.Map;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2021-01-13 15:06
  **/
+@Slf4j
 public class ExcelRead2Sql extends ExcelRead<SqlEntityTable, SqlDataWrapper<SqlEntityTable>> implements Serializable {
 
-    private static final Logger log = LoggerFactory.getLogger(ExcelRead2Sql.class);
 
     // public static void main(String[] args) throws Exception {
     //     DbConfig dbConfig = new DbConfig()

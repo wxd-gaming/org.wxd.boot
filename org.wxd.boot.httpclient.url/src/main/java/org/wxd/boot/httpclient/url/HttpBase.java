@@ -9,9 +9,11 @@ import org.wxd.boot.http.HttpHeadValueType;
 import org.wxd.boot.http.ssl.SslContextClient;
 import org.wxd.boot.http.ssl.SslProtocolType;
 import org.wxd.boot.lang.SyncJson;
-import org.wxd.boot.publisher.Mono;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
+import org.wxd.boot.threading.Event;
+import org.wxd.boot.threading.Executors;
+import org.wxd.boot.threading.OptFuture;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -38,6 +40,8 @@ public abstract class HttpBase<H extends HttpBase> {
     protected HttpHeadValueType httpHeadValueType = HttpHeadValueType.Application;
     protected SslProtocolType sslProtocolType = SslProtocolType.SSL;
     protected final Map<String, String> reqHeaderMap = new LinkedHashMap<>();
+    protected long logTime = 200;
+    protected long waringTime = 1200;
     protected int connTimeout = 3000;
     protected int readTimeout = 3000;
     protected int retry = 1;
@@ -46,7 +50,6 @@ public abstract class HttpBase<H extends HttpBase> {
     protected String reqHttpMethod;
     protected final Response<H> response;
     protected StackTraceElement[] stackTraceElements;
-
 
     protected HttpBase(String uriPath) {
         header(HttpHeadNameType.Accept_Encoding, HttpHeadValueType.Gzip);
@@ -112,11 +115,17 @@ public abstract class HttpBase<H extends HttpBase> {
         }
     }
 
-    public Mono<Response<H>> async() {
+    public OptFuture<Response<H>> async() {
         return sendAsync(3);
     }
 
-    public Mono<String> asyncString() {
+    public void async(Consumer<Response<H>> consumer) {
+        sendAsync(3)
+                .subscribe(consumer)
+                .onError(this::actionThrowable);
+    }
+
+    public OptFuture<String> asyncString() {
         return sendAsync(3).map(Response::bodyString);
     }
 
@@ -126,7 +135,7 @@ public abstract class HttpBase<H extends HttpBase> {
                 .onError(this::actionThrowable);
     }
 
-    public Mono<SyncJson> asyncSyncJson() {
+    public OptFuture<SyncJson> asyncSyncJson() {
         return sendAsync(3).map(Response::bodySyncJson);
     }
 
@@ -136,11 +145,27 @@ public abstract class HttpBase<H extends HttpBase> {
                 .onError(this::actionThrowable);
     }
 
-    Mono<Response<H>> sendAsync(int stackTraceIndex) {
+    OptFuture<Response<H>> sendAsync(int stackTraceIndex) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         stackTraceElements = new StackTraceElement[stackTrace.length - stackTraceIndex];
         System.arraycopy(stackTrace, stackTraceIndex, stackTraceElements, 0, stackTraceElements.length);
-        return Mono.createAsync(this::request);
+        OptFuture<Response<H>> optFuture = OptFuture.empty();
+        Executors.getVTExecutor().submit(new Event(logTime, waringTime) {
+            @Override public String getTaskInfoString() {
+                return Throw.ofString(stackTraceElements[0]) + " " + HttpBase.this.response.toString();
+            }
+
+            @Override public void onEvent() throws Exception {
+                try {
+                    action();
+                    optFuture.complete(response);
+                } catch (Throwable throwable) {
+                    optFuture.completeExceptionally(throwable);
+                    //log.error("构建异步http回调异常 {} ", getTaskInfoString(), throwable);
+                }
+            }
+        }, stackTraceIndex + 2);
+        return optFuture;
     }
 
     public Response<H> request() {
@@ -191,7 +216,9 @@ public abstract class HttpBase<H extends HttpBase> {
             }
         }
         RuntimeException runtimeException = Throw.as(HttpBase.this.toString() + ", 重试：" + action, throwable);
-        runtimeException.setStackTrace(stackTraceElements);
+        if (stackTraceElements != null) {
+            runtimeException.setStackTrace(stackTraceElements);
+        }
         throw runtimeException;
     }
 
@@ -199,6 +226,18 @@ public abstract class HttpBase<H extends HttpBase> {
         log.error("{} url:{}", this.getClass().getSimpleName(), response.toString(), throwable);
         if (retry > 1)
             GlobalUtil.exception(this.getClass().getSimpleName() + " url:" + response.toString(), throwable);
+    }
+
+    /** 同时设置连接超时和读取超时时间 */
+    public H logTime(int time) {
+        this.logTime = time;
+        return (H) this;
+    }
+
+    /** 同时设置连接超时和读取超时时间 */
+    public H waringTime(int time) {
+        this.waringTime = time;
+        return (H) this;
     }
 
     /** 同时设置连接超时和读取超时时间 */
@@ -260,6 +299,18 @@ public abstract class HttpBase<H extends HttpBase> {
     public H header(String headerKey, String HeaderValue) {
         this.reqHeaderMap.put(headerKey, HeaderValue);
         return (H) this;
+    }
+
+    public String url() {
+        return response.uriPath.toString();
+    }
+
+    public String getPostText() {
+        return response.getPostText();
+    }
+
+    @Override public String toString() {
+        return String.valueOf(this.response);
     }
 
     protected static class TrustAnyHostnameVerifier implements HostnameVerifier {

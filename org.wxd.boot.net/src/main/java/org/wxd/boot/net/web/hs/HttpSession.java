@@ -47,6 +47,8 @@ public class HttpSession extends Session implements Serializable {
     private long lastReadTime = 0;
     private long resTime = 0;
     private boolean showLog = false;
+    /** 如果是物理文件 */
+    private boolean file = false;
     /** 多段是提交方案 */
     private InterfaceHttpPostRequestDecoder httpDecoder = null;
 
@@ -186,9 +188,7 @@ public class HttpSession extends Session implements Serializable {
                         .append("\n=============================================请求================================================")
                         .append("\n").append(request.method()).append(" ").append(this.getCompleteUri())
                         .append("\nSession：").append(NioFactory.getCtxName(this.getChannelContext())).append(" ").append(this.getId()).append("; Remote-Host：").append(this.getRemoteAddress()).append("; Local-Host：").append(this.getLocalAddress())
-                        .append(";\nUser-Agent：").append(this.header(HttpHeaderNames.USER_AGENT))
                         .append(";\nContent-type：").append(this.getReqContentType())
-                        .append(";\nAccept-Encoding：").append(this.header(HttpHeaderNames.ACCEPT_ENCODING))
                         .append(";\n").append(HttpHeaderNames.COOKIE).append("：").append(this.header(HttpHeaderNames.COOKIE))
                         .append(";\n参数：").append(this.getReqContent());
             }
@@ -228,16 +228,8 @@ public class HttpSession extends Session implements Serializable {
         reqContentType = reqContentType.toLowerCase();
 
         if (request.method().equals(HttpMethod.POST)) {
-            if (reqContentType.contains("json")
-                    || reqContentType.contains("xml")
-                    || reqContentType.contains("pure-text")) {
-                /*纯文本格式解析*/
-            } else if (reqContentType.contains("multipart")) {
-                httpDecoder = new HttpPostMultipartRequestDecoder(factory, request, StandardCharsets.UTF_8);
-            } else {
-                httpDecoder = new HttpPostStandardRequestDecoder(factory, request, StandardCharsets.UTF_8);
-            }
-            if (this.httpDecoder != null) {
+            if (reqContentType.contains("multipart")) {
+                this.httpDecoder = new HttpPostMultipartRequestDecoder(factory, request, StandardCharsets.UTF_8);
                 this.httpDecoder.setDiscardThreshold(0);
             }
         }
@@ -256,6 +248,7 @@ public class HttpSession extends Session implements Serializable {
         String uriString = this.getRequest().uri();
         URI uriPath = new URI(uriString);
         String uriPathString = uriPath.getPath();
+        uriPathString = HttpDataAction.rawUrlDecode(uriPathString);
         if (uriPathString.length() > 1) {
             if (uriPathString.endsWith("/")) {
                 uriPathString = uriPathString.substring(0, uriPathString.length() - 1);
@@ -341,57 +334,58 @@ public class HttpSession extends Session implements Serializable {
      * @throws Exception
      */
     protected void actionPostData() throws Exception {
-        try {
+        if (this.httpDecoder != null) {
+            try {
+                while (this.httpDecoder.hasNext()) {
+                    InterfaceHttpData data = this.httpDecoder.next();
+                    if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                        Attribute attribute = (Attribute) data;
+                        String get = this.getReqParams().getString(data.getName());
+                        if (StringUtil.notEmptyOrNull(get)) {
+                            get = get + "," + attribute.getValue();
+                        } else {
+                            get = attribute.getValue();
+                        }
+                        if (isMultipart()) {
+                            /*多段式提交的话，会多包装了一层*/
+                            get = URLDecoder.decode(get, StandardCharsets.UTF_8);
+                        }
+                        this.getReqParams().put(data.getName(), get);
+                    } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
+                        FileUpload fileUpload = (FileUpload) data;
+                        if (fileUpload.isCompleted()) {
+                            String orign_name = URLDecoder.decode(fileUpload.getFilename(), StandardCharsets.UTF_8);
+                            FileUpload retainedDuplicate = fileUpload.retainedDuplicate();
+                            this.getUploadFilesMap().put(orign_name, retainedDuplicate);
+                        }
+                    }
+                }
+            } catch (HttpPostRequestDecoder.EndOfDataDecoderException e) {
+                /*这里无需打印*/
+            }
+            this.reqContent = HttpDataAction.httpData(this.getReqParams());
+        } else {
+            this.reqContent = new String(this.reqContentByteBuf, StandardCharsets.UTF_8);
+            this.reqContent = URLDecoder.decode(this.reqContent, StandardCharsets.UTF_8);
             if (this.reqContentType.contains("json")) {
-                this.reqContent = new String(this.reqContentByteBuf, StandardCharsets.UTF_8);
                 if (StringUtil.notEmptyOrNull(this.reqContent)) {
                     final ObjMap jsonObject = ObjMap.parse(this.reqContent);
                     if (jsonObject != null && !jsonObject.isEmpty()) {
                         this.getReqParams().putAll(jsonObject);
                     }
                 }
-            } else if (this.reqContentType.contains("xml") ||
-                    this.reqContentType.contains("pure-text")) {
-                this.reqContent = new String(this.reqContentByteBuf, StandardCharsets.UTF_8);
-            } else if (this.httpDecoder != null) {
-                try {
-                    while (this.httpDecoder.hasNext()) {
-                        InterfaceHttpData data = this.httpDecoder.next();
-                        if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
-                            Attribute attribute = (Attribute) data;
-                            String get = this.getReqParams().getString(data.getName());
-                            if (StringUtil.notEmptyOrNull(get)) {
-                                get = get + "," + attribute.getValue();
-                            } else {
-                                get = attribute.getValue();
-                            }
-                            if (isMultipart()) {
-                                /*多段式提交的话，会多包装了一层*/
-                                get = URLDecoder.decode(get, StandardCharsets.UTF_8);
-                            }
-                            this.getReqParams().put(data.getName(), get);
-                        } else if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.FileUpload) {
-                            FileUpload fileUpload = (FileUpload) data;
-                            if (fileUpload.isCompleted()) {
-                                String orign_name = URLDecoder.decode(fileUpload.getFilename(), StandardCharsets.UTF_8);
-                                FileUpload retainedDuplicate = fileUpload.retainedDuplicate();
-                                this.getUploadFilesMap().put(orign_name, retainedDuplicate);
-                            }
-                        }
-                    }
-                } catch (HttpPostRequestDecoder.EndOfDataDecoderException e) {
-                    /*这里无需打印*/
-                }
+            } else if (this.reqContentType.contains("xml") || this.reqContentType.contains("pure-text")) {
 
-                this.reqContent = HttpDataAction.httpData(this.getReqParams());
-            }
-        } finally {
-            try {
-                if (this.httpDecoder != null) {
-                    this.httpDecoder.destroy();
+            } else {
+                String[] split = this.reqContent.split("&");
+                for (String s : split) {
+                    int index = s.indexOf("=");
+                    if (index < 0) {
+                        this.getReqParams().put(s, "");
+                    } else {
+                        this.getReqParams().put(s.substring(0, index), s.substring(index + 1));
+                    }
                 }
-            } catch (Exception e) {
-                log.error("释放资源", e);
             }
         }
     }

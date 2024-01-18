@@ -11,7 +11,7 @@ public enum JDKVersion {
     Jdk_16(16, "16"),
     Jdk_17(17, "17"),
     Jdk_19(19, "19"),
-    Jdk_21(19, "21"),
+    Jdk_21(21, "21"),
     ;
 
     private static JDKVersion runTimeJDKVersion;

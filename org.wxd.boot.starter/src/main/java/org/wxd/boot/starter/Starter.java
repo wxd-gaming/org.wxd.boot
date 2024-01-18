@@ -10,7 +10,7 @@ import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.agent.function.Consumer2;
 import org.wxd.boot.agent.function.ConsumerE2;
 import org.wxd.boot.agent.function.STVFunction1;
-import org.wxd.boot.agent.io.FileWriteUtil;
+import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.system.ReflectContext;
 import org.wxd.boot.collection.OfSet;
 import org.wxd.boot.starter.action.ActionProtoController;
@@ -22,7 +22,6 @@ import org.wxd.boot.str.json.ProtobufMessageSerializerFastJson;
 import org.wxd.boot.system.GlobalUtil;
 import org.wxd.boot.system.JvmUtil;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -39,9 +38,6 @@ public class Starter {
 
     private static volatile IocContext mainIocInjector = null;
     private static volatile IocContext childIocInjector = null;
-
-    /** 服务器启动成功 */
-    private static final File OKFile = new File("ok.txt");
 
     public static IocContext curIocInjector() {
         if (childIocInjector == null) return mainIocInjector;
@@ -123,8 +119,7 @@ public class Starter {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
                 }
-                boolean delete = OKFile.delete();
-                log.info("------------------------------停服处理结束-{}------------------------------", delete);
+                log.info("------------------------------停服处理结束------------------------------");
                 JvmUtil.halt(0);
             });
             log.info("主容器初始化完成：{}", mainIocInjector.hashCode());
@@ -226,56 +221,23 @@ public class Starter {
             curIocInjector().forEachBean(IStartEnd.class, startEndFun, curIocInjector());
         }
         print(debug, serverId, serverName, extInfos);
-        printOk();
-    }
-
-    /** 启动成功标记 */
-    public static void printOk() {
-        FileWriteUtil.writeString(OKFile, JvmUtil.processIDString());
-    }
-
-    /** 启动失败 */
-    public static void printFail() {
-        FileWriteUtil.writeString(OKFile, "0");
-    }
-
-    /** 删除文件 */
-    public static void delOk() {
-        OKFile.delete();
     }
 
     public static void print(boolean debug, int serverId, String serverName, String... extInfos) {
         StringBuilder stringAppend = new StringBuilder(1024);
 
-        String year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
+        String printString = FileReadUtil.readString("print.txt");
+
+        int len = 60;
 
         stringAppend.append("\n\n")
-                .append("                                               _ooOoo_\n")
-                .append("                                              o8888888o\n")
-                .append("                                              88\" . \"88\n")
-                .append("                                              (| -_- |)\n")
-                .append("                                               O\\ = /O\n")
-                .append("                                           ____/`---'\\____\n")
-                .append("                                         .   ' \\\\| |// `.\n")
-                .append("                                          / \\\\||| W |||// \\\n")
-                .append("                                        / _||||| -X- |||||- \\\n")
-                .append("                                          | | \\\\\\ X /// | |\n")
-                .append("                                        | \\_| ''\\-D-/'' |_/ |\n")
-                .append("                                         \\ .-\\__ `" + year.charAt(0) + "` __/-. /\n")
-                .append("                                      ___`. .' /--" + year.charAt(1) + "--\\ `. . __\n")
-                .append("                                   .\"\" '< `.___\\_<" + year.charAt(2) + ">_/___.' >' \"\".\n")
-                .append("                                  | | : `- \\`.;`\\ " + year.charAt(3) + " /`;.`/ - ` : | |\n")
-                .append("                                    \\ \\ `-. \\_ __\\ /__ _/ .-` / /\n")
-                .append("                            ======`-.____`-.___\\_____/___.-`____.-'======\n")
-                .append("                                               `=---='\n")
-                .append("                                                                         \n")
-                .append("                            .............................................\n")
-                .append("                                                                         \n")
-                .append("------------->> [ " + StringUtil.padRight("debug = " + debug + " | " + JvmUtil.processIDString(), 80, ' ') + " ] <<-------------\n")
-                .append("------------->> [ " + StringUtil.padRight(serverId + " | " + serverName, 80, ' ') + " ] <<-------------\n")
-                .append("------------->> [ " + StringUtil.padRight(JvmUtil.timeZone(), 80, ' ') + " ] <<-------------\n");
+                .append(printString)
+                .append("\n")
+                .append("    -[ " + StringUtil.padRight("debug = " + debug + " | " + JvmUtil.processIDString(), len, ' ') + " ]-\n")
+                .append("    -[ " + StringUtil.padRight(serverId + " | " + serverName, len, ' ') + " ]-\n")
+                .append("    -[ " + StringUtil.padRight(JvmUtil.timeZone(), len, ' ') + " ]-\n");
         for (String extInfo : extInfos) {
-            stringAppend.append("------------->> [ " + StringUtil.padRight(extInfo, 80, ' ') + " ] <<-------------\n");
+            stringAppend.append("    -[ " + StringUtil.padRight(extInfo, len, ' ') + " ]-\n");
         }
         stringAppend.append("\n");
         LoggerFactory.getLogger(Starter.class).warn(stringAppend.toString());

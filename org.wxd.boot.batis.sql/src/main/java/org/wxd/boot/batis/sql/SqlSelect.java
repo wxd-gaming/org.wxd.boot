@@ -1,12 +1,12 @@
 package org.wxd.boot.batis.sql;
 
-import org.wxd.boot.collection.ObjMap;
+import org.wxd.boot.agent.function.PredicateE;
 import org.wxd.boot.lang.Tuple2;
 import org.wxd.boot.str.StringUtil;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author: Troy.Chen(無心道, 15388152619)
@@ -102,7 +102,7 @@ interface SqlSelect<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> ex
      */
     default <R> R queryEntityByWhere(DM entityTable, String sqlWhere, Object... args) {
         String selectSql = entityTable.getSelectSql();
-        if (sqlWhere != null && sqlWhere.length() > 0) {
+        if (sqlWhere != null && !sqlWhere.isEmpty()) {
             selectSql += " where " + sqlWhere;
         }
         return queryEntity(selectSql, entityTable, args);
@@ -118,32 +118,23 @@ interface SqlSelect<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> ex
      * @return
      */
     default <R> R queryEntity(String sqlString, DM entityTable, Object... args) {
-        final List<ObjMap> resultSet = new ArrayList<>();
+        AtomicReference<R> atomicReference = new AtomicReference<>();
         if (entityTable.getSplitNumber() > 1) {
             for (int i = 0; i < entityTable.getSplitNumber(); i++) {
                 String replace = entityTable.replaceTableName(sqlString, entityTable.tableName(i));
-                query(replace, args,
-                        row -> {
-                            resultSet.add(row);
-                            return false;
-                        }
-                );
+                query(replace, args, row -> {
+                    atomicReference.set(builderDataModel(row, entityTable));
+                    return false;
+                });
             }
         } else {
-            query(sqlString, args,
-                    row -> {
-                        resultSet.add(row);
-                        return false;
-                    }
-            );
+            query(sqlString, args, row -> {
+                atomicReference.set(builderDataModel(row, entityTable));
+                return false;
+            });
         }
 
-        R ret = null;
-        if (!resultSet.isEmpty()) {
-            ret = builderDataModel(resultSet.get(0), entityTable);
-        }
-
-        return ret;
+        return atomicReference.get();
     }
 
     default <R> List<R> queryEntities(Class<R> clazz, Object... args) {
@@ -158,7 +149,7 @@ interface SqlSelect<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> ex
 
     default <R> List<R> queryEntitiesWhere(DM entityTable, String sqlWhere, Object... args) {
         String selectSql = entityTable.getSelectSql();
-        if (sqlWhere != null && sqlWhere.length() > 0) {
+        if (sqlWhere != null && !sqlWhere.isEmpty()) {
             selectSql += " where " + sqlWhere;
         }
         return queryEntities(selectSql, entityTable, args);
@@ -204,25 +195,22 @@ interface SqlSelect<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> ex
      */
     default <R> List<R> queryEntities(String sqlString, DM entityTable, Object... args) {
         List<R> ts = new LinkedList<>();
+        queryEntities((PredicateE<R>) r -> {
+            ts.add(r);
+            return true;
+        }, sqlString, entityTable, args);
+        return ts;
+    }
+
+    default <R> void queryEntities(PredicateE<R> predicate, String sqlString, DM entityTable, Object... args) {
         if (entityTable.getSplitNumber() > 1) {
             for (int i = 0; i < entityTable.getSplitNumber(); i++) {
                 String replace = entityTable.replaceTableName(sqlString, entityTable.tableName(i));
-                List<ObjMap> resultSet = query(replace, args);
-                if (resultSet.size() > 0) {
-                    for (ObjMap rs : resultSet) {
-                        ts.add(builderDataModel(rs, entityTable));
-                    }
-                }
+                query(replace, args, rs -> predicate.test(builderDataModel(rs, entityTable)));
             }
         } else {
-            List<ObjMap> resultSet = query(sqlString, args);
-            if (resultSet.size() > 0) {
-                for (ObjMap rs : resultSet) {
-                    ts.add(builderDataModel(rs, entityTable));
-                }
-            }
+            query(sqlString, args, rs -> predicate.test(builderDataModel(rs, entityTable)));
         }
-        return ts;
     }
 
 }

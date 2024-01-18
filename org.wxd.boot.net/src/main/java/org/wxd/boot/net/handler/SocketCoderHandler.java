@@ -185,7 +185,8 @@ public interface SocketCoderHandler<S extends SocketSession> extends Serializabl
 
             if (messageId == MessagePackage.getMessageId(Rpc.ResRemote.class)) {
                 Rpc.ResRemote resSyncMessage = Rpc.ResRemote.parseFrom(messageBytes);
-                log.debug("收到消息：{} {}{}", session, resSyncMessage.getClass().getSimpleName(), FastJsonUtil.toJson(resSyncMessage));
+                if (log.isDebugEnabled())
+                    log.debug("收到消息：{} {}{}", session, resSyncMessage.getClass().getSimpleName(), FastJsonUtil.toJson(resSyncMessage));
                 if (resSyncMessage.getRpcId() > 0) {
                     String params = resSyncMessage.getParams();
                     if (resSyncMessage.getGzip() == 1) {

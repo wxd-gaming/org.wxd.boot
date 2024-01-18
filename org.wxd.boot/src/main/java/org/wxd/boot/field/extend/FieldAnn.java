@@ -28,20 +28,12 @@ import java.lang.annotation.*;
 })
 @Repeatable(FieldAnns.class)
 public @interface FieldAnn {
-    /**
-     * 忽律字段
-     *
-     * @return
-     */
+    /** 忽律字段 */
     boolean alligator() default false;
 
     FieldType[] fieldTypes() default {};
 
-    /**
-     * 备注描述
-     *
-     * @return
-     */
+    /** 备注描述 */
     String remarks() default "";
 
 }

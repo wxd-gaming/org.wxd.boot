@@ -8,12 +8,7 @@ import java.lang.annotation.*;
  * <p> 默认是 一秒一次
  */
 @Documented
-@Target(
-        {
-                ElementType.METHOD, /*方法*/
-                ElementType.LOCAL_VARIABLE/*局部变量*/
-        }
-)
+@Target({ElementType.METHOD, /*方法*/})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Scheduled {
 

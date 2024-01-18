@@ -64,8 +64,7 @@ public abstract class ExcelRead<DM extends EntityTable, DW extends DataWrapper<D
         this.excelDataTableMap = new LinkedHashMap<>();
         List<File> excelFiles = new LinkedList<>();
         for (String excelPath : excelPaths) {
-            Collection<File> files = FileUtil.findFile(new File(excelPath), loopFind, ".xls", ".xlsx");
-            excelFiles.addAll(files);
+            FileUtil.walkFiles(excelPath, ".xls", ".xlsx").forEach(excelFiles::add);
         }
 
         if (excelFiles.isEmpty()) {

@@ -22,7 +22,7 @@ public class JScript {
     }
 
     public static JScript build(String file) {
-        return build(FileUtil.file(file));
+        return build(new File(file));
     }
 
     public static JScript build(File file) {

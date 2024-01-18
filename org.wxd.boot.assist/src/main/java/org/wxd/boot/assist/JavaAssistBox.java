@@ -1,8 +1,7 @@
-package org.wxd.boot.agent.system;
+package org.wxd.boot.assist;
 
 import javassist.*;
 import lombok.Getter;
-import org.wxd.boot.agent.function.ConsumerE1;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,6 +42,16 @@ public class JavaAssistBox extends ClassLoader {
         }
     }
 
+    /**
+     * 回调
+     *
+     * @author: Troy.Chen(無心道, 15388152619)
+     * @version: 2024-01-05 21:16
+     **/
+    public interface Call<T> {
+        void accept(T t) throws Exception;
+    }
+
     @Getter
     public static class JavaAssist {
 
@@ -55,8 +64,7 @@ public class JavaAssistBox extends ClassLoader {
         }
 
         /** 查询已有的方法 */
-        public JavaAssist declaredMethod(String methodName, CtClass[] methodParams,
-                                         ConsumerE1<CtMethod> call) {
+        public JavaAssist declaredMethod(String methodName, CtClass[] methodParams, Call<CtMethod> call) {
             try {
                 CtMethod ctMethod = ctClass.getDeclaredMethod(methodName, methodParams);
                 call.accept(ctMethod);
@@ -77,7 +85,7 @@ public class JavaAssistBox extends ClassLoader {
          */
         public JavaAssist createMethod(int modifier, CtClass returnType,
                                        String methodName, CtClass[] methodParams,
-                                       ConsumerE1<CtMethod> call) {
+                                       Call<CtMethod> call) {
             try {
                 CtMethod ctMethod = new CtMethod(returnType, methodName, methodParams, ctClass);
                 ctMethod.setModifiers(modifier);
@@ -127,7 +135,7 @@ public class JavaAssistBox extends ClassLoader {
         }
 
         /** 通过 classloader 加载类 */
-        public JavaAssist call(ConsumerE1<Class<?>> call) {
+        public JavaAssist call(Call<Class<?>> call) {
             try {
                 Class<?> aClass = loadClass();
                 call.accept(aClass);
@@ -148,8 +156,13 @@ public class JavaAssistBox extends ClassLoader {
 
     /** 查找某个类编辑 */
     public JavaAssist editClass(Class<?> clazz) {
+        return editClass(clazz.getName());
+    }
+
+    /** 查找某个类编辑 */
+    public JavaAssist editClass(String clazzName) {
         try {
-            CtClass tmp = CLASS_POOL.get(clazz.getName());
+            CtClass tmp = CLASS_POOL.get(clazzName);
             return new JavaAssist(this, tmp);
         } catch (Exception e) {
             throw new RuntimeException(e);

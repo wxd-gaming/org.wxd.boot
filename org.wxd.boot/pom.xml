@@ -17,6 +17,11 @@
             <artifactId>org.wxd.boot.agent</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.wxd</groupId>
+            <artifactId>org.wxd.boot.assist</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- 导航网格算法需要-->
         <dependency>
             <groupId>com.vividsolutions</groupId>
@@ -116,7 +121,7 @@
 
 
     <build>
-        <finalName>boot</finalName>
+        <finalName>wxd-j21-boot</finalName>
         <extensions>
             <!--protobuf插件-->
             <extension>

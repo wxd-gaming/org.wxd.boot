@@ -10,6 +10,7 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 import org.wxd.boot.agent.io.FileUtil;
 import org.wxd.boot.agent.io.FileWriteUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.lang.ObjectBase;
 import org.wxd.boot.str.xml.XmlUtil;
 
@@ -40,7 +41,9 @@ public class Post_Run_Config extends ObjectBase implements Serializable {
             try {
                 instance = new Post_Run_Config();
                 instance.getUrlList().add(new Urls(6001, "本机", "http://127.0.0.1:18611"));
-                FileWriteUtil.writeString("config/post-run-config.xml", instance.toXml());
+                String fileName = "config/post-run-config.xml";
+                FileWriteUtil.writeString(fileName, instance.toXml());
+                System.out.println("初始化配置：" + fileName);
             } catch (Exception e) {
                 log.error("初始化配置", e);
             }
@@ -52,8 +55,12 @@ public class Post_Run_Config extends ObjectBase implements Serializable {
     }
 
     public static Post_Run_Config postRunConfig() throws Exception {
-        InputStream stream = FileUtil.findInputStream("post-run-config.xml");
-        return postRunConfig(stream);
+        Record2<String, InputStream> inputStream = FileUtil.findInputStream("post-run-config.xml");
+        if (inputStream == null) {
+            return null;
+        }
+        System.out.println("读取文件目录：" + inputStream.t1());
+        return postRunConfig(inputStream.t2());
     }
 
     public static Post_Run_Config postRunConfig(InputStream stream) throws Exception {

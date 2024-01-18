@@ -3,8 +3,6 @@ package demo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.wxd.boot.publisher.Flux;
-import org.wxd.boot.publisher.Mono;
-import org.wxd.boot.threading.Executors;
 
 import java.util.List;
 
@@ -19,21 +17,6 @@ public class TestPublisher {
 
     @Test
     public void t1() throws Exception {
-        Mono.createAsync(() -> {
-                    try {Thread.sleep(1000);} catch (InterruptedException e) {throw new RuntimeException(e);}
-                    return 1;
-                })
-                .subscribe(v -> log.debug("{}", v))
-                .filter(v -> v == 2)
-                .map(i -> "我是Mono：" + i)
-                .orComplete(() -> "我是特殊值 Mono")
-                .subscribe(v -> log.debug("{}", v))
-                .map(v -> {throw new RuntimeException("执行异常");})
-                .whenComplete((t, throwable) -> {
-                    log.debug("whenComplete {}", t, throwable);
-                })
-                .onError(throwable -> log.debug("onError", throwable))
-        ;
 
         Flux.createAsync(() -> {
                     try {
@@ -72,28 +55,4 @@ public class TestPublisher {
         }
 
     }
-
-    @Test
-    public void y3() throws InterruptedException {
-
-        Mono.create("{}")
-                .map(v -> "我是map：" + v)
-                .subscribe(v -> log.info(v));
-
-        Mono.createAsync(() -> {
-                    try {
-                        Thread.sleep(500);
-                        return "{}";
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(v -> "我是 async map：" + v)
-                .subscribe(v -> log.info(v));
-
-        Executors.getDefaultExecutor().completableFuture(() -> {}).thenAccept((v) -> {log.debug("{}", 1);});
-
-        Thread.sleep(3000);
-    }
-
 }

@@ -8,6 +8,7 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 import org.wxd.boot.agent.io.FileUtil;
 import org.wxd.boot.agent.io.FileWriteUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.collection.OfSet;
 import org.wxd.boot.lang.ObjectBase;
 import org.wxd.boot.str.Md5Util;
@@ -32,10 +33,7 @@ import java.util.Optional;
 @Root
 public class SignConfig extends ObjectBase implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     private static SignConfig instance = null;
-
 
     public static SignConfig get() {
         if (instance == null) {
@@ -53,7 +51,9 @@ public class SignConfig extends ObjectBase implements Serializable {
                                     .setToken(Md5Util.md5DigestEncode(MyClock.millis() + ""))
                                     .setAuthority(OfSet.asSet(1, 2, 3, 4, 5, 6, 7, 8, 9))
                     );
-                    FileWriteUtil.writeString("config/sign-config.xml", instance.toXml());
+                    String fileName = "config/sign-config.xml";
+                    FileWriteUtil.writeString(fileName, instance.toXml());
+                    System.out.println("初始化配置：" + fileName);
                 } catch (Exception e) {
                     log.error("初始化配置", e);
                 }
@@ -63,8 +63,12 @@ public class SignConfig extends ObjectBase implements Serializable {
     }
 
     public static SignConfig signConfig() throws Exception {
-        InputStream stream = FileUtil.findInputStream("sign-config.xml");
-        return signConfig(stream);
+        Record2<String, InputStream> inputStream = FileUtil.findInputStream("sign-config.xml");
+        if (inputStream == null) {
+            throw new RuntimeException("文件不存在 sign-config.xml");
+        }
+        System.out.println("读取配置：" + inputStream.t1());
+        return signConfig(inputStream.t2());
     }
 
     public static SignConfig signConfig(InputStream stream) throws Exception {

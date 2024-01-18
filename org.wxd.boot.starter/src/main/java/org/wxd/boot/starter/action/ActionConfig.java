@@ -5,6 +5,7 @@ import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.io.FileUtil;
 import org.wxd.boot.agent.io.FileWriteUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.agent.system.AnnUtil;
 import org.wxd.boot.agent.zip.GzipUtil;
 import org.wxd.boot.starter.config.Config;
@@ -39,7 +40,7 @@ public class ActionConfig {
                 configPath = aClass.getSimpleName().toLowerCase() + "." + config.configType().name().toLowerCase();
             }
 
-            final InputStream inputStream = FileUtil.findInputStream(configPath);
+            Record2<String, InputStream> inputStream = FileUtil.findInputStream(configPath);
             if (inputStream != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("配置文件初始化：" + aClass.getSimpleName() + " - " + configPath);
@@ -47,17 +48,17 @@ public class ActionConfig {
                 try {
                     switch (config.configType()) {
                         case Bin: {
-                            byte[] bytes = FileReadUtil.readBytes(inputStream);
+                            byte[] bytes = FileReadUtil.readBytes(inputStream.t2());
                             byte[] unGZip = GzipUtil.unGZip(bytes);
                             o = FastJsonUtil.parse(unGZip, aClass);
                         }
                         break;
                         case Xml: {
-                            o = XmlUtil.fromXml(FileReadUtil.readString(inputStream), aClass);
+                            o = XmlUtil.fromXml(FileReadUtil.readString(inputStream.t2()), aClass);
                         }
                         break;
                         case Json: {
-                            o = FastJsonUtil.parse(FileReadUtil.readString(inputStream), aClass);
+                            o = FastJsonUtil.parse(FileReadUtil.readString(inputStream.t2()), aClass);
                         }
                         break;
                     }

@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -53,6 +53,10 @@ public class ReadZipFile implements Serializable, Closeable {
         }
     }
 
+    public Stream<? extends ZipEntry> stream() {
+        return zip.stream();
+    }
+
     public byte[] find(String entryName) {
         ZipEntry zipEntry = zip.getEntry(entryName);
         return unzipFile(zipEntry);
@@ -61,44 +65,52 @@ public class ReadZipFile implements Serializable, Closeable {
     /** 读取一个 .zip 所有内容 */
     public Map<String, byte[]> readAll() {
         Map<String, byte[]> map = new LinkedHashMap<>();
-        forEach((name, bytes) -> map.put(name, bytes));
+        forEach(map::put);
         return map;
     }
 
     /**
      * 循环读取所有
      *
-     * @param eConsumer 循环
+     * @param call 循环
      * @return
      */
-    public void forEach(ConsumerE2<String, byte[]> eConsumer) {
-        zip.stream().forEach(zipEntry -> {
-            final String vName = zipEntry.getName();
-            byte[] bytes = unzipFile(zipEntry);
-            try {
-                eConsumer.accept(vName, bytes);
-            } catch (Exception e) {
-                throw Throw.as(e);
-            }
-        });
+    public void forEach(ConsumerE2<String, byte[]> call) {
+        zip.stream()
+                .filter(z -> !z.isDirectory())
+                .forEach(z -> {
+                    byte[] bytes = unzipFile(z);
+                    try {
+                        call.accept(z.getName(), bytes);
+                    } catch (Exception e) {
+                        throw Throw.as(e);
+                    }
+                });
     }
 
-    byte[] unzipFile(ZipEntry zipEntry) {
-        AtomicReference<byte[]> bytes = new AtomicReference<>();
-        unzipFileStream(zipEntry, (ConsumerE2<String, InputStream>) (name, inputStream) -> bytes.set(FileReadUtil.readBytes(inputStream)));
-        return bytes.get();
-    }
-
+    /** InputStream 需要自己关闭 */
     public void forEachStream(ConsumerE2<String, InputStream> call) {
-        zip.stream().forEach(zipEntry -> {
-            if (!zipEntry.isDirectory())
-                unzipFileStream(zipEntry, call);
-        });
+        zip.stream()
+                .filter(z -> !z.isDirectory())
+                .forEach(z -> {
+                    InputStream inputStream = unzipFileStream(z);
+                    try {
+                        call.accept(z.getName(), inputStream);
+                    } catch (Exception e) {
+                        throw Throw.as(e);
+                    }
+                });
     }
 
-    void unzipFileStream(ZipEntry zipEntry, ConsumerE2<String, InputStream> call) {
-        try (InputStream inputStream = zip.getInputStream(zipEntry)) {
-            call.accept(zipEntry.getName(), inputStream);
+    public byte[] unzipFile(ZipEntry zipEntry) {
+        InputStream inputStream = unzipFileStream(zipEntry);
+        return FileReadUtil.readBytes(inputStream);
+    }
+
+    /** InputStream 需要自己关闭 */
+    public InputStream unzipFileStream(ZipEntry zipEntry) {
+        try {
+            return zip.getInputStream(zipEntry);
         } catch (Exception e) {
             throw Throw.as(e);
         }

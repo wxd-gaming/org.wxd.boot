@@ -12,7 +12,7 @@ import org.wxd.boot.net.controller.TextMappingRecord;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.str.json.FastJsonUtil;
 import org.wxd.boot.system.GlobalUtil;
-import org.wxd.boot.threading.EventRunnable;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.threading.ExecutorLog;
 
 import java.lang.reflect.Type;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * @version: 2023-12-19 15:38
  **/
 @Slf4j
-class CmdListenerAction extends EventRunnable {
+class CmdListenerAction extends Event {
 
     private final TextMappingRecord mappingRecord;
     private final SocketSession session;

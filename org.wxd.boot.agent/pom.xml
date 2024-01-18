@@ -12,21 +12,15 @@
     <artifactId>org.wxd.boot.agent</artifactId>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
         <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
             <version>2.3.31</version>
         </dependency>
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.29.2-GA</version>
-        </dependency>
     </dependencies>
 
     <build>
-        <finalName>agent</finalName>
+        <finalName>wxd-j21-agent</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -40,7 +34,7 @@
                         </manifest>
                         <manifestEntries>
                             <Manifest-Version>1.0</Manifest-Version>
-                            <Agent-Class>org.wxd.agent.AgentService</Agent-Class>
+                            <Agent-Class>org.wxd.boot.agent.AgentService</Agent-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>

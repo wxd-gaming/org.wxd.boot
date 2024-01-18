@@ -24,6 +24,7 @@
         <module>org.wxd.boot.net</module>
         <module>org.wxd.boot.net.http2service</module>
         <module>org.wxd.boot.starter</module>
+        <module>org.wxd.boot.assist</module>
     </modules>
 
     <properties>
@@ -91,17 +92,17 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-access</artifactId>
-            <version>1.4.11</version>
+            <version>1.4.12</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.11</version>
+            <version>1.4.12</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.4.11</version>
+            <version>1.4.12</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -129,10 +130,10 @@
                 <version>3.10.1</version>
                 <configuration>
                     <compilerArgs>
-                        <arg>--add-exports=java.base/sun.security.pkcs=ALL-UNNAMED</arg>
-                        <arg>--add-exports=java.base/sun.reflect.annotation=ALL-UNNAMED</arg>
                         <arg>--add-opens=java.base/java.lang=ALL-UNNAMED</arg>
                         <arg>--add-opens=java.base/java.util=ALL-UNNAMED</arg>
+                        <arg>--add-exports=java.base/sun.security.pkcs=ALL-UNNAMED</arg>
+                        <arg>--add-exports=java.base/sun.reflect.annotation=ALL-UNNAMED</arg>
                         <arg>--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
                         <arg>--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>

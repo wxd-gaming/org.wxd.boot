@@ -24,18 +24,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class DataRepository<DM extends EntityTable, DW extends DataWrapper<DM>> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     protected ConcurrentMap<String, DbBean> beanMap = new ConcurrentHashMap<>();
 
-    /**
-     * 获取编译器
-     */
+    /** 获取编译器 */
     public abstract DW dataBuilder();
 
-    /**
-     * 数据来源名字
-     */
+    /** 数据来源名字 */
     public abstract String dataName();
 
     public <R extends DbBean> R getDbBean(Class<R> beanClazz) {
@@ -141,7 +135,7 @@ public abstract class DataRepository<DM extends EntityTable, DW extends DataWrap
 
     public <R extends DbBean> R load(Class<R> beanClazz, DM entityTable) {
         try {
-            R dbBean = beanClazz.newInstance();
+            R dbBean = beanClazz.getDeclaredConstructor().newInstance();
             dbBean.setDataStruct(entityTable);
             dbBean.setModelList(readDbList(entityTable));
             dbBean.initDb();

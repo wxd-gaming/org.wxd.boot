@@ -5,6 +5,7 @@ import java.lang.annotation.*;
 /**
  * 指定运行的线程池
  */
+@Inherited
 @Documented
 @Target({
         ElementType.METHOD, /*方法*/

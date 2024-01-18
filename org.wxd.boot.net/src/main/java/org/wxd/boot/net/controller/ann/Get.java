@@ -8,5 +8,6 @@ import java.lang.annotation.*;
         ElementType.LOCAL_VARIABLE/*局部变量*/
 })
 @Retention(RetentionPolicy.RUNTIME)
+@TextMapping
 public @interface Get {
 }

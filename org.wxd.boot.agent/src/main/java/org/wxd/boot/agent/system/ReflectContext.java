@@ -14,7 +14,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
@@ -48,10 +51,10 @@ public class ReflectContext {
     }
 
     /** 获取类型实现的接口 */
-    public static Collection<Class<?>> getInterfaces(Class<?> cls) {
+    public static Stream<Class<?>> getInterfaces(Class<?> cls) {
         TreeMap<String, Class<?>> classCollection = new TreeMap<>();
         getInterfaces(classCollection, cls);
-        return new ArrayList<>(classCollection.values());
+        return classCollection.values().stream();
     }
 
     /** 获取类实现的接口 */

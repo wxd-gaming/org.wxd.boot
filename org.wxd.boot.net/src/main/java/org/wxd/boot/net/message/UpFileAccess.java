@@ -113,7 +113,7 @@ public class UpFileAccess implements Serializable {
     private ObjMap jsonObject;
     private String filePath;
     private String fileName;
-    private MarkTimer markTime = MarkTimer.build();
+    private final MarkTimer markTime = MarkTimer.build();
     private int readMaxCount = 0;
     private byte[] fileDatas;
 
@@ -129,7 +129,7 @@ public class UpFileAccess implements Serializable {
         /*设置消息内容发送次数*/
         headMap.append("bodyCount", forCount);
 
-        session.rpc("rpc.upload.file.head", headMap.toJson()).asyncOkByString((result) -> {
+        session.rpc("rpc.upload.file.head", headMap.toJson()).asyncString((result) -> {
 
             if (!"OK!".equalsIgnoreCase(result)) {
                 throw new Throw("文件传输失败-HEAD：" + result);

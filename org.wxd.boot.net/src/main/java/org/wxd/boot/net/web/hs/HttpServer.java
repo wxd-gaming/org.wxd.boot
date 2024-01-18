@@ -372,11 +372,13 @@ public class HttpServer extends NioServer<HttpSession> {
             if (session.isShowLog() || log.isDebugEnabled()) {
                 StringBuilder stringBuilder = session.showLog();
                 if (!stringBuilder.isEmpty()) {
-                    stringBuilder
-                            .append(";\n=============================================输出================================================")
-                            .append("\n").append(new String(bytes, StandardCharsets.UTF_8))
-                            .append("\n=============================================结束================================================")
-                            .append("\n");
+                    if (!session.isFile()) {
+                        stringBuilder
+                                .append(";\n=============================================输出================================================")
+                                .append("\n").append(new String(bytes, StandardCharsets.UTF_8))
+                                .append("\n=============================================结束================================================")
+                                .append("\n");
+                    }
                     log.info(stringBuilder.toString());
                 }
             }

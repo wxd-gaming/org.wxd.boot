@@ -12,7 +12,7 @@ interface SqlDel<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> exten
 
     /** 删除一条数据 */
     default int delete(Object obj) {
-        DM entityTable = (DM) ((SqlDataHelper) this).asEntityTable(obj);
+        DM entityTable = ((SqlDataHelper<DM, DW>) this).asEntityTable(obj);
         String sqlStr = entityTable.getDeleteSql(obj);
         Object id = entityTable.getDataColumnKey().getFieldValue(obj);
         return this.executeUpdate(sqlStr, id);
@@ -20,7 +20,7 @@ interface SqlDel<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> exten
 
     /** 删除一条数据 */
     default int delete(Class clazz, Object... args) {
-        DM entityTable = (DM) ((SqlDataHelper) this).asEntityTable(clazz);
+        DM entityTable = ((SqlDataHelper<DM, DW>) this).asEntityTable(clazz);
         return delete(entityTable, args);
     }
 
@@ -32,7 +32,7 @@ interface SqlDel<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> exten
 
     /** 删除一条数据 */
     default int deleteWhere(Class clazz, String sqlWhere, Object... args) {
-        DM entityTable = (DM) ((SqlDataHelper) this).asEntityTable(clazz);
+        DM entityTable = ((SqlDataHelper<DM, DW>) this).asEntityTable(clazz);
         return deleteWhere(entityTable, sqlWhere, args);
     }
 
@@ -58,7 +58,7 @@ interface SqlDel<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> exten
 
     /** 批量删除数据 */
     default long deleteBatch(Class clazz, Collection<Object[]> paramList) {
-        DM entityTable = (DM) ((SqlDataHelper) this).asEntityTable(clazz);
+        DM entityTable = ((SqlDataHelper<DM, DW>) this).asEntityTable(clazz);
         return deleteBatch(entityTable, paramList);
     }
 
@@ -84,7 +84,7 @@ interface SqlDel<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> exten
 
     /** 清库 */
     default int truncates() {
-        final Set<String> set = ((SqlDataHelper) this).getDbTableStructMap().keySet();
+        final Set<String> set = ((SqlDataHelper<DM, DW>) this).getDbTableStructMap().keySet();
         int size = 0;
         for (String tableName : set) {
             size += truncate(tableName);
@@ -94,7 +94,7 @@ interface SqlDel<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> exten
 
     /** 清空表 */
     default int truncate(Class<?> clazz) {
-        DM entityTable = (DM) ((SqlDataHelper) this).asEntityTable(clazz);
+        DM entityTable = ((SqlDataHelper<DM, DW>) this).asEntityTable(clazz);
         return truncate(entityTable);
     }
 

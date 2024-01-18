@@ -24,6 +24,11 @@
         </dependency>
         <dependency>
             <groupId>org.wxd</groupId>
+            <artifactId>org.wxd.boot.assist</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wxd</groupId>
             <artifactId>org.wxd.boot.batis</artifactId>
             <version>${project.version}</version>
         </dependency>

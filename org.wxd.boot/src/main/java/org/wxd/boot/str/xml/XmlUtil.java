@@ -4,13 +4,12 @@ import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.stream.Format;
 import org.wxd.boot.agent.exception.Throw;
-import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.io.FileUtil;
 import org.wxd.boot.agent.io.FileWriteUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.agent.zip.ZipUtil;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.StringWriter;
 
@@ -45,17 +44,9 @@ public class XmlUtil {
      * 读取XML文件，加载进相应Object类型
      */
     public static <T> T fromXml4File(String path, Class<T> type) {
-        final InputStream inputStream = FileUtil.findInputStream(path);
+        final Record2<String, InputStream> inputStream = FileUtil.findInputStream(path);
         if (inputStream == null) throw new RuntimeException("找不到文件：" + path);
-        return fromXml(inputStream, type);
-    }
-
-    /**
-     * 读取XML文件，加载进相应Object类型
-     */
-    public static <T> T fromXml4File(File file, Class<T> type) {
-        String xmlString = FileReadUtil.readString(file);
-        return fromXml(xmlString, type);
+        return fromXml(inputStream.t1(), type);
     }
 
     /**

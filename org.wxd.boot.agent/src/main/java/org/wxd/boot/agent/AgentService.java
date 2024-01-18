@@ -1,7 +1,6 @@
 package org.wxd.boot.agent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.agent.exception.Throw;
 import org.wxd.boot.agent.io.FileReadUtil;
 import org.wxd.boot.agent.io.FileUtil;
@@ -29,10 +28,9 @@ import java.util.stream.Collectors;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2020-12-29 20:24
  **/
+@Slf4j
 public class AgentService implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    private static final Logger log = LoggerFactory.getLogger(AgentService.class);
     private static final String Full_Class_Name = "com.sun.tools.attach.VirtualMachine";
 
     public static String jdkHome() {
@@ -51,14 +49,20 @@ public class AgentService implements Serializable {
         return agentJarPath;
     }
 
+    /**
+     * 热更类
+     *
+     * @param agentPath 执行热加载的class文件目录
+     */
     public static String agentClass(String agentPath) throws Throwable {
         return agentClass(agentJarPath(), agentPath);
     }
 
     /**
+     * 热更类
+     *
      * @param agentJarPath agent Jar 路径
      * @param agentPath    执行热加载的class文件目录
-     * @throws Exception
      */
     public static String agentClass(String agentJarPath, String agentPath) throws Throwable {
         String pid = getPid();
@@ -93,12 +97,9 @@ public class AgentService implements Serializable {
             if (systemClassLoader instanceof URLClassLoader) {
 
                 /* 注意，是jre的bin目录，不是jdk的bin目录，VirtualMachine need the attach.dll in the jre of the JDK. */
-                File toolsJarPath = FileUtil.findFile(new File(jreHome + File.pathSeparator + ".."), true, file1 -> {
-                    if (file1.getPath().toLowerCase().endsWith("lib/tools.jar")) {
-                        return true;
-                    }
-                    return false;
-                });
+                File toolsJarPath = FileUtil.walkFiles(jreHome + File.pathSeparator + "..", "lib/tools.jar")
+                        .findFirst()
+                        .orElse(null);
 
                 log.info("java_home：" + toolsJarPath);
 

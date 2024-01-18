@@ -9,11 +9,7 @@ import java.lang.annotation.*;
  * @author: Troy.Chen(無心道, 15388152619)
  * @version: 2022-04-15 08:50
  **/
-@Target(
-        {
-                ElementType.TYPE,         /*类*/
-        }
-)
+@Target({ElementType.TYPE/*类*/})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Config {

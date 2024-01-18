@@ -10,6 +10,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -616,19 +617,21 @@ public class MyClock {
      */
     public static void clearFile(int fileDays, File filePath, String... names) {
         try {
-            FileUtil.findFile(filePath, true, (checkFile) -> {
-                if (countDays(millis(), checkFile.lastModified()) > fileDays) {
-                    checkFile.delete();
-                    final File parentFile = checkFile.getParentFile();
-                    if (parentFile != null && parentFile.isDirectory()) {
-                        final File[] files = parentFile.listFiles();
-                        if (files == null || files.length < 1) {
-                            /*删除空文件夹*/
-                            parentFile.delete();
+            FileUtil.walkFiles(filePath, names)
+                    .sorted(Comparator.reverseOrder())
+                    .forEach((checkFile) -> {
+                        if (countDays(millis(), checkFile.lastModified()) > fileDays) {
+                            checkFile.delete();
+                            final File parentFile = checkFile.getParentFile();
+                            if (parentFile != null && parentFile.isDirectory()) {
+                                final File[] files = parentFile.listFiles();
+                                if (files == null || files.length < 1) {
+                                    /*删除空文件夹*/
+                                    parentFile.delete();
+                                }
+                            }
                         }
-                    }
-                }
-            }, names);
+                    });
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -636,11 +639,7 @@ public class MyClock {
     }
 
 
-    /**
-     * 获取指定日期，开始时间，00:00:00
-     *
-     * @return
-     */
+    /** 获取指定日期，开始时间，00:00:00 */
     public static long dayOfStartMillis() {
         return dayOfStartMillis(millis());
     }

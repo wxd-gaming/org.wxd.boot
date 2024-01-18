@@ -9,6 +9,7 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/org.wxd.boot.agent-premain/pom.xml" />
         <option value="$PROJECT_DIR$/org.wxd.boot.net.httpclient/pom.xml" />
         <option value="$PROJECT_DIR$/org.wxd.boot.start/pom.xml" />
       </set>

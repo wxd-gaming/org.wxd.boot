@@ -40,7 +40,6 @@ public class DumpUtil {
      * <p>垃圾回收是jvm说了算，只是调用了，至于什么时候执行管不了
      */
     public static void gc() {
-        System.runFinalization();
         System.gc();
     }
 

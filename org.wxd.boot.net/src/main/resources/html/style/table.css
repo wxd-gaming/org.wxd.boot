@@ -26,4 +26,6 @@
 /*鼠标放上去后背景颜色*/
 .tableDom table tbody tr:hover {background: rgba(98, 143, 139, 0.51);}
 
+.tableDom table tbody .tdh:hover {overflow: visible;background-color: yellow;padding-right: 5px;white-space: pre-wrap; /* 定义换行 */ word-break: break-all; /* 定义断行 */}
+
 .tableDom table th, .tableDom table td {box-sizing: border-box; border-top: none; border-left: none; /*border-right: none;*/}

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * java 文件编译
@@ -75,7 +76,7 @@ public class JavaCoderCompile {
      * @param sourceDir 需要编译的文件路径
      */
     public JavaCoderCompile compilerJava(String sourceDir) throws Exception {
-        final Collection<File> sourceFileList = FileUtil.loopLists(sourceDir, ".java");
+        final Collection<File> sourceFileList = FileUtil.walkFiles(sourceDir, ".java").collect(Collectors.toList());
         compilerJava(sourceDir, sourceFileList);
         return this;
     }

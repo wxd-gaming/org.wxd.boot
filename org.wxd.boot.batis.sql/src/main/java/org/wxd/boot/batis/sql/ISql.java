@@ -29,11 +29,7 @@ public interface ISql<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> 
 
     DW getDataWrapper();
 
-    /**
-     * 获取数据库的链接
-     *
-     * @return
-     */
+    /** 获取数据库的链接 */
     Connection getConnection();
 
     /**
@@ -174,8 +170,8 @@ public interface ISql<DM extends SqlEntityTable, DW extends SqlDataWrapper<DM>> 
                             e);
                 }
             }
-            if (obj instanceof DataChecked) {
-                ((DataChecked) obj).initAndCheck();
+            if (obj instanceof DataChecked dataChecked) {
+                dataChecked.initAndCheck();
             }
             return obj;
         } catch (Exception e) {

@@ -5,11 +5,9 @@ import straightedge.geom.Vector3;
 
 /**
  * 任意多边形，
- * <br>
- * author 失足程序员<br>
- * blog http://www.cnblogs.com/shizuchengxuyuan/<br>
- * phone 13882122019<br>
- * email 492794628@qq.com<br>
+ *
+ * @author: Troy.Chen(無心道, 15388152619)
+ * @version: 2023-12-04 19:23
  */
 public class CheckPolygon extends Check {
 

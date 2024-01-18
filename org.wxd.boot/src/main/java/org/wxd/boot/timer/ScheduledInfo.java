@@ -8,7 +8,7 @@ import org.wxd.boot.agent.system.AnnUtil;
 import org.wxd.boot.ann.Sort;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.GlobalUtil;
-import org.wxd.boot.threading.EventRunnable;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.timer.ann.Scheduled;
 
 import java.lang.reflect.Method;
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class ScheduledInfo extends EventRunnable implements Comparable<ScheduledInfo> {
+public class ScheduledInfo extends Event implements Comparable<ScheduledInfo> {
 
     private String name;
     private int index;

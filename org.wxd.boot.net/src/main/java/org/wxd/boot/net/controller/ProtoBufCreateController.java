@@ -20,7 +20,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 /**
  * @author: Troy.Chen(無心道, 15388152619)
@@ -62,8 +61,8 @@ public class ProtoBufCreateController {
                 return;
             }
 
-            Collection<File> collect = FileUtil.findFile(new File(protoSourcePath), false, ".proto");
-            if (collect == null) return;
+            Collection<File> collect = FileUtil.walkFiles(protoSourcePath, 1, ".proto").toList();
+            if (collect.isEmpty()) return;
             final LocalShell localShell = LocalShell.build(file.getAbsoluteFile().getParentFile());
 
             for (File r : collect) {
@@ -76,7 +75,7 @@ public class ProtoBufCreateController {
             final LinkedList<String> errorLines = localShell.getErrorLines();
             if (errorLines != null && !errorLines.isEmpty()) {
                 System.out.println("执行异常：");
-                String joinError = errorLines.stream().collect(Collectors.joining("\n"));
+                String joinError = String.join("\n", errorLines);
                 System.out.println(joinError);
             }
             System.out.println("转化 " + codeLan + " 处理完成 !!! 请注意异常");
@@ -87,7 +86,7 @@ public class ProtoBufCreateController {
 
     public TreeMap<String, Integer> createMessageId(String startsWithRegex) {
         final String _startsWithRegex = "^(" + startsWithRegex + ").*";
-        Collection<File> lists = FileUtil.lists(protoSourcePath, ".proto");
+        Collection<File> lists = FileUtil.walkFiles(protoSourcePath, 1, ".proto").toList();
         TreeMap<String, Integer> msgIdMap = new TreeMap<>();
         for (File protoFile : lists) {
 
@@ -134,7 +133,7 @@ public class ProtoBufCreateController {
                                  String obj_player_package,
                                  String obj_player_name) {
         final String _startsWithRegex = "^(" + startsWithRegex + ").*";
-        Collection<File> lists = FileUtil.lists(protoSourcePath, ".proto");
+        Collection<File> lists = FileUtil.walkFiles(protoSourcePath, 1, ".proto").toList();
         for (File protoFile : lists) {
 
             String name = FileUtil.fileName(protoFile);

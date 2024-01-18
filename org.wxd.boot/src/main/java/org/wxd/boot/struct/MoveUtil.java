@@ -5,11 +5,9 @@ import straightedge.geom.Vector3;
 
 /**
  * 移动和工具辅助函数
- * <br>
- * author 失足程序员<br>
- * blog http://www.cnblogs.com/shizuchengxuyuan/<br>
- * mail 492794628@qq.com<br>
- * phone 13882122019<br>
+ *
+ * @author: Troy.Chen(無心道, 15388152619)
+ * @version: 2023-12-04 19:23
  */
 public class MoveUtil {
 

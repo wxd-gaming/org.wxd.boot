@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.wxd.boot.system.JvmUtil;
-import org.wxd.boot.threading.EventRunnable;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.threading.Executors;
 import org.wxd.boot.threading.Job;
 
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  **/
 @Slf4j
 @Getter
-public class TimerJobPool extends EventRunnable {
+public class TimerJobPool extends Event {
 
     protected Job job;
 

@@ -11,12 +11,7 @@ import java.lang.annotation.*;
  * @version: 2020-12-30 20:33
  */
 @Documented
-@Target(
-        {
-                ElementType.FIELD,         /*字段*/
-                ElementType.LOCAL_VARIABLE /*局部变量*/
-        }
-)
+@Target({ElementType.FIELD/*字段*/})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DbColumn {
 

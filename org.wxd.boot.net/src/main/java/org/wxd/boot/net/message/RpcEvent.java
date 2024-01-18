@@ -10,9 +10,13 @@ import org.wxd.boot.lang.SyncJson;
 import org.wxd.boot.net.SocketSession;
 import org.wxd.boot.str.StringUtil;
 import org.wxd.boot.system.MarkTimer;
+import org.wxd.boot.threading.Event;
 import org.wxd.boot.threading.Executors;
+import org.wxd.boot.threading.OptFuture;
 
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -46,13 +50,12 @@ public class RpcEvent {
     protected boolean sendEnd;
     protected boolean res = false;
     protected String resJson = null;
-    protected StackTraceElement[] threadStackTrace = null;
+    protected StackTraceElement[] stackTraceElements = null;
 
     public RpcEvent(SocketSession session, String cmd, String reqJson) {
         this.session = session;
         this.cmd = cmd;
         this.reqJson = reqJson;
-
     }
 
     /** 发送出去，不管了 */
@@ -71,103 +74,64 @@ public class RpcEvent {
         sendEnd = true;
     }
 
-    /** 构建异步处理 */
-    public CompletableFuture<RpcEvent> completableFuture() {
+    public OptFuture<RpcEvent> async() {
+        return sendAsync(3);
+    }
+
+    public void async(Consumer<RpcEvent> consumer) {
+        sendAsync(3)
+                .subscribe(consumer)
+                .onError(this::actionThrowable);
+    }
+
+    public OptFuture<String> asyncString() {
+        return sendAsync(3).map(RpcEvent::getResJson);
+    }
+
+    public void asyncString(Consumer<String> consumer) {
+        sendAsync(3)
+                .subscribe(rpcEvent -> consumer.accept(rpcEvent.getResJson()))
+                .onError(this::actionThrowable);
+    }
+
+    public OptFuture<SyncJson> asyncSyncJson() {
+        return sendAsync(3).map(rpcEvent -> SyncJson.parse(rpcEvent.getResJson()));
+    }
+
+    public void asyncSyncJson(Consumer<SyncJson> consumer) {
+        sendAsync(3)
+                .subscribe(rpcEvent -> consumer.accept(SyncJson.parse(rpcEvent.getResJson())))
+                .onError(this::actionThrowable);
+    }
+
+    OptFuture<RpcEvent> sendAsync(int stackTraceIndex) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        threadStackTrace = new StackTraceElement[stackTrace.length - 2];
-        System.arraycopy(stackTrace, 2, threadStackTrace, 0, threadStackTrace.length);
-        return CompletableFuture.supplyAsync(() -> {
-            this.get();
-            return RpcEvent.this;
-        });
-    }
+        stackTraceElements = new StackTraceElement[stackTrace.length - stackTraceIndex];
+        System.arraycopy(stackTrace, stackTraceIndex, stackTraceElements, 0, stackTraceElements.length);
+        OptFuture<RpcEvent> optFuture = OptFuture.empty();
+        Executors.getVTExecutor().submit(new Event(150, 1500) {
+            @Override public String getTaskInfoString() {
+                return RpcEvent.this.toString();
+            }
 
-    /** 成功才会回调，有异常不会回调 */
-    public void asyncOkBySyncJson(Consumer<SyncJson> ok) {
-        async(rpcEvent -> ok.accept(SyncJson.parse(rpcEvent.resJson)), null, null);
-    }
-
-    /** 成功才会回调，有异常不会回调 */
-    public void asyncOkByString(Consumer<String> ok) {
-        async(rpcEvent -> ok.accept(rpcEvent.resJson), null, null);
-    }
-
-    /** 成功才会回调，有异常不会回调 */
-    public void async(Consumer<RpcEvent> ok) {
-        async(ok, null, null);
-    }
-
-    /**
-     * 异步完成
-     *
-     * @param complete 无论是否异常都会回调
-     */
-    public void asyncComplete(Consumer<RpcEvent> complete) {
-        async(null, complete, null);
-    }
-
-    /**
-     * 异步完成
-     *
-     * @param ok       成功才会回调，有异常不会回调
-     * @param complete 无论是否异常都会回调
-     */
-    public void async(Consumer<RpcEvent> ok, Consumer<RpcEvent> complete) {
-        async(ok, complete, null);
-    }
-
-    /**
-     * 异步完成
-     *
-     * @param ok       成功才会回调，有异常不会回调
-     * @param complete 异步完成后无论是否异常都会回调
-     * @param error    出现异常调用
-     */
-    public CompletableFuture<RpcEvent> async(Consumer<RpcEvent> ok, Consumer<RpcEvent> complete, Consumer<Throwable> error) {
-        return completableFuture()
-                .thenApply(rpcEvent -> {
-                    if (ok != null) {
-                        try {
-                            ok.accept(rpcEvent);
-                        } catch (Throwable t) {
-                            if (error == null) {
-                                log.error("rpc 处理异常：" + cmd + ", " + reqJson, t);
-                            } else {
-                                error.accept(t);
-                            }
-                        }
+            @Override public void onEvent() throws Exception {
+                try {
+                    get();
+                    optFuture.complete(RpcEvent.this);
+                } catch (Throwable throwable) {
+                    RuntimeException runtimeException = Throw.as(RpcEvent.this.toString(), throwable);
+                    if (stackTraceElements != null) {
+                        runtimeException.setStackTrace(stackTraceElements);
                     }
-                    return rpcEvent;
-                })
-                .whenComplete((rpcEvent, throwable) -> {
-                    if (complete != null) {
-                        try {
-                            complete.accept(rpcEvent);
-                        } catch (Throwable t) {
-                            if (error == null) {
-                                log.error("rpc 处理异常：" + cmd + ", " + reqJson, t);
-                            } else {
-                                error.accept(t);
-                            }
-                        }
-                    }
-                })
-                .exceptionally(throwable -> {
+                    optFuture.completeExceptionally(runtimeException);
+                }
+            }
+        }, stackTraceIndex + 2);
+        return optFuture;
+    }
 
-                    if (throwable instanceof CompletionException) {
-                        throwable = throwable.getCause();
-                    }
-
-                    if (error == null) {
-                        log.error("rpc 处理异常：" + cmd + ", " + reqJson, throwable);
-                    } else {
-                        RuntimeException aThrow = new Throw(throwable.toString());
-                        aThrow.setStackTrace(threadStackTrace);
-                        error.accept(aThrow);
-                    }
-
-                    return RpcEvent.this;
-                });
+    public void actionThrowable(Throwable throwable) {
+        log.error("{} url:{}", this.getClass().getSimpleName(), this.toString(), throwable);
     }
 
     /** 同步请求，等待结果 */

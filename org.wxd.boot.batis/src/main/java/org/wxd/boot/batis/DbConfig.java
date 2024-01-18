@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.wxd.boot.agent.io.FileUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.lang.ObjectBase;
 import org.wxd.boot.str.xml.XmlUtil;
 
@@ -21,8 +22,11 @@ public class DbConfig extends ObjectBase implements Serializable, Cloneable {
 
     /** 先从外部配置config 目录读取 然后再从resources 读取 */
     public static DbConfig loadConfigXml(String fileName) throws Exception {
-        InputStream file = FileUtil.findInputStream(fileName);
-        return loadConfigXml(file);
+        Record2<String, InputStream> inputStream = FileUtil.findInputStream(fileName);
+        if (inputStream == null) {
+            throw new RuntimeException("文件不存在 " + fileName);
+        }
+        return loadConfigXml(inputStream.t2());
     }
 
     /** 先从外部配置config 目录读取 然后再从resources 读取 */

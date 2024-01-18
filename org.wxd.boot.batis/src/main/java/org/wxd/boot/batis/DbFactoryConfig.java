@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 import org.wxd.boot.agent.io.FileUtil;
+import org.wxd.boot.agent.lang.Record2;
 import org.wxd.boot.lang.ObjectBase;
 import org.wxd.boot.str.xml.XmlUtil;
 
@@ -24,11 +25,12 @@ import java.util.List;
 @Root
 public class DbFactoryConfig extends ObjectBase implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    public static DbFactoryConfig build(String name) throws Exception {
-        InputStream stream = FileUtil.findInputStream(name);
-        return build(stream);
+    public static DbFactoryConfig build(String fileName) throws Exception {
+        Record2<String, InputStream> inputStream = FileUtil.findInputStream(fileName);
+        if (inputStream == null) {
+            throw new RuntimeException("文件不存在 " + fileName);
+        }
+        return build(inputStream.t2());
     }
 
     public static DbFactoryConfig build(InputStream stream) throws Exception {

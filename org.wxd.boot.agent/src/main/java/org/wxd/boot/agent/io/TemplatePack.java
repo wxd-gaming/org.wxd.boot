@@ -104,7 +104,7 @@ public class TemplatePack {
         try {
             //1.实例化模板对象
             Template template = getTemplate(ftl);
-            try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8")) {
+            try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
                 template.process(dataObj, outputStreamWriter);
             }
         } catch (Throwable throwable) {
