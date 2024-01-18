@@ -24,7 +24,7 @@ start()
 		return 1
 	fi
 
-	JAVA_PARAM="-Xms${MEM} -Xmx${MEM} -Xss512k -Dfile.encoding=UTF-8 -XX:InitialCodeCacheSize=64m -XX:ReservedCodeCacheSize=500m -Dsun.jnu.encoding=UTF-8 -XX:CICompilerCount=2 -XX:+HeapDumpOnOutOfMemoryError -XX:-OmitStackTraceInFastThrow -XX:MaxDirectMemorySize=512m -XX:MaxGCPauseMillis=100 -Djdk.attach.allowAttachSelf=true -Xlog:gc*:gc.log:time,level,tags -XX:+UseG1GC -server -jar"
+	JAVA_PARAM="-Xms${MEM} -Xmx${MEM} -Xss512k -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -XX:CICompilerCount=4 -XX:-OmitStackTraceInFastThrow -XX:MaxDirectMemorySize=512m -XX:MaxGCPauseMillis=100 -Djdk.attach.allowAttachSelf=true -Xlog:gc*:target/gc.log:time,level,tags -XX:+UseZGC -XX:ConcGCThreads=2 -XX:+UseDynamicNumberOfGCThreads -server -jar"
 
 	nohup /usr/local/openjdk-21/bin/java ${JAVA_PARAM} ${JAR} > nohup.out 2>&1 &
 

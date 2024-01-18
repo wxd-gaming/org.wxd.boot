@@ -30,7 +30,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.101.Final</version>
+            <version>4.1.105.Final</version>
         </dependency>
         <dependency>
             <groupId>com.github.l42111996</groupId>
