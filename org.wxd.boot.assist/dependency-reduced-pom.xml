@@ -3,12 +3,12 @@
   <parent>
     <artifactId>org.wxd</artifactId>
     <groupId>org.wxd</groupId>
-    <version>wxd-j21-01</version>
+    <version>wxd-j17-01</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.wxd.boot.assist</artifactId>
   <build>
-    <finalName>wxd-j21-assist</finalName>
+    <finalName>wxd-j17-assist</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>

@@ -30,7 +30,7 @@
     </dependencies>
 
     <build>
-        <finalName>wxd-j21-httpclient-jdk</finalName>
+        <finalName>wxd-j17-httpclient-jdk</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

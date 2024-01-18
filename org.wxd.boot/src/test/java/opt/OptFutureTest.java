@@ -56,7 +56,7 @@ public class OptFutureTest {
     @Test
     public void o3() throws Exception {
         OptFuture<Integer> optFuture = OptFuture.empty();
-        Executors.getVTExecutor().submit(() -> {
+        Executors.getLogicExecutor().submit(() -> {
             try {
                 //Thread.sleep(5);
             } catch (Exception e) {
@@ -82,7 +82,7 @@ public class OptFutureTest {
                 .peek(s -> log.info("{}", s))
                 .peek(s -> log.info("{}", s));
 
-        Executors.getVTExecutor().submit(() -> {
+        Executors.getLogicExecutor().submit(() -> {
             try {
                 Thread.sleep(5);
                 map

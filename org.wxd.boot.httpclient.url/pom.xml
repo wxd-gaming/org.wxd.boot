@@ -31,7 +31,7 @@
     </dependencies>
 
     <build>
-        <finalName>wxd-j21-httpclient-url</finalName>
+        <finalName>wxd-j17-httpclient-url</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

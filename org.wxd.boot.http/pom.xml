@@ -25,7 +25,7 @@
     </dependencies>
 
     <build>
-        <finalName>wxd-j21-http</finalName>
+        <finalName>wxd-j17-http</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

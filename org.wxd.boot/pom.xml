@@ -121,7 +121,7 @@
 
 
     <build>
-        <finalName>wxd-j21-boot</finalName>
+        <finalName>wxd-j17-boot</finalName>
         <extensions>
             <!--protobuf插件-->
             <extension>

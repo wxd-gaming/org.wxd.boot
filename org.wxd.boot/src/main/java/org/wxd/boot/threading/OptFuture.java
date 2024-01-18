@@ -33,7 +33,7 @@ public class OptFuture<T> {
 
     /** 创建异步获取数据 */
     public static <U> OptFuture<U> createAsync(Supplier<U> supplier) {
-        return new OptFuture<>(supplier, Executors.getVTExecutor(), 5);
+        return new OptFuture<>(supplier, Executors.getLogicExecutor(), 5);
     }
 
     /** 创建异步获取数据 */

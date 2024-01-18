@@ -109,7 +109,7 @@ public class RpcEvent {
         stackTraceElements = new StackTraceElement[stackTrace.length - stackTraceIndex];
         System.arraycopy(stackTrace, stackTraceIndex, stackTraceElements, 0, stackTraceElements.length);
         OptFuture<RpcEvent> optFuture = OptFuture.empty();
-        Executors.getVTExecutor().submit(new Event(150, 1500) {
+        Executors.getLogicExecutor().submit(new Event(150, 1500) {
             @Override public String getTaskInfoString() {
                 return RpcEvent.this.toString();
             }

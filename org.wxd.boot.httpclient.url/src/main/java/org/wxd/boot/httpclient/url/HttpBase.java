@@ -150,7 +150,7 @@ public abstract class HttpBase<H extends HttpBase> {
         stackTraceElements = new StackTraceElement[stackTrace.length - stackTraceIndex];
         System.arraycopy(stackTrace, stackTraceIndex, stackTraceElements, 0, stackTraceElements.length);
         OptFuture<Response<H>> optFuture = OptFuture.empty();
-        Executors.getVTExecutor().submit(new Event(logTime, waringTime) {
+        Executors.getLogicExecutor().submit(new Event(logTime, waringTime) {
             @Override public String getTaskInfoString() {
                 return Throw.ofString(stackTraceElements[0]) + " " + HttpBase.this.response.toString();
             }

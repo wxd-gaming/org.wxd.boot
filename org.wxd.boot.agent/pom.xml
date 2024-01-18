@@ -20,7 +20,7 @@
     </dependencies>
 
     <build>
-        <finalName>wxd-j21-agent</finalName>
+        <finalName>wxd-j17-agent</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -37,8 +37,6 @@ public final class Executors implements Serializable {
     private static IExecutorServices defaultExecutor = null;
     /** 属于后台线程池，一旦收到停服新号，线程立马关闭了 */
     private static IExecutorServices logicExecutor = null;
-    /** 属于后台线程池, 虚拟线程池，一旦收到停服新号，线程立马关闭了 */
-    private static IExecutorServices vtExecutor = null;
 
     public static IExecutorServices getDefaultExecutor() {
         if (defaultExecutor == null) {
@@ -54,23 +52,6 @@ public final class Executors implements Serializable {
             }
         }
         return defaultExecutor;
-    }
-
-    /** 虚拟线程池，每一个任务都是一个新的虚拟线程 */
-    public static IExecutorServices getVTExecutor() {
-        if (vtExecutor == null) {
-            REENTRANT_LOCK.lock();
-            try {
-                if (vtExecutor == null) {
-                    Integer core = JvmUtil.getProperty(JvmUtil.VT_Executor_Core_Size, 200, Integer::valueOf);
-                    Integer max = JvmUtil.getProperty(JvmUtil.VT_Executor_Max_Size, 400, Integer::valueOf);
-                    vtExecutor = newExecutorVirtualServices("default-executor", core, max);
-                }
-            } finally {
-                REENTRANT_LOCK.unlock();
-            }
-        }
-        return vtExecutor;
     }
 
     public static IExecutorServices getLogicExecutor() {
@@ -144,52 +125,6 @@ public final class Executors implements Serializable {
      */
     public static ExecutorServices newExecutorServices(String name, boolean daemon, int coreSize, int maxSize) {
         return new ExecutorServices(name, daemon, coreSize, maxSize);
-    }
-
-
-    /**
-     * 虚拟线程池 默认队列最大长度2000,单线程
-     * <p>
-     * 禁止使用 synchronized 同步锁
-     * <p>
-     * 直接线程池，每一个任务都会new Virtual Thread
-     *
-     * @param name 线程池名称
-     * @return
-     */
-    public static ExecutorVirtualServices newExecutorVirtualServices(String name) {
-        return newExecutorVirtualServices(name, 1);
-    }
-
-    /**
-     * 虚拟线程池核心数量和最大数量相等，
-     * <p>
-     * 禁止使用 synchronized 同步锁
-     * <p>
-     * 直接线程池，每一个任务都会new Virtual Thread
-     *
-     * @param name     线程池名称
-     * @param coreSize 线程核心数量
-     * @return
-     */
-    public static ExecutorVirtualServices newExecutorVirtualServices(String name, int coreSize) {
-        return newExecutorVirtualServices(name, coreSize, coreSize);
-    }
-
-    /**
-     * 虚拟线程池
-     * <p>
-     * 禁止使用 synchronized 同步锁
-     * <p>
-     * 直接线程池，每一个任务都会new Virtual Thread
-     *
-     * @param name     线程池名称
-     * @param coreSize 线程核心数量
-     * @param coreSize 线程最大数量
-     * @return
-     */
-    public static ExecutorVirtualServices newExecutorVirtualServices(String name, int coreSize, int maxSize) {
-        return new ExecutorVirtualServices(name, coreSize, maxSize);
     }
 
     /** 检测当前线程是否是同一线程 */

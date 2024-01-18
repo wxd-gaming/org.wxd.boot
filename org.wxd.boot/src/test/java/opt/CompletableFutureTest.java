@@ -26,7 +26,7 @@ public class CompletableFutureTest {
             }
         };
         // CompletableFuture.supplyAsync(supplier, Executors.getVTExecutor());
-        OptFuture<Long> completable = Executors.getVTExecutor().optFuture(supplier);
+        OptFuture<Long> completable = Executors.getLogicExecutor().optFuture(supplier);
         completable.peek(v -> System.out.println(v));
         while (true) ;
     }
@@ -61,7 +61,7 @@ public class CompletableFutureTest {
 
     @Test
     public void c13() throws IOException {
-        OptFuture<String> stringCompletableFuture = Executors.getVTExecutor().optFuture(() -> {
+        OptFuture<String> stringCompletableFuture = Executors.getLogicExecutor().optFuture(() -> {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -75,7 +75,7 @@ public class CompletableFutureTest {
 
     @Test
     public void c14() throws IOException {
-        OptFuture<String> stringCompletableFuture = Executors.getVTExecutor().optFuture(() -> {
+        OptFuture<String> stringCompletableFuture = Executors.getLogicExecutor().optFuture(() -> {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {

@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wxd</groupId>
         <artifactId>org.wxd</artifactId>
-        <version>wxd-j21-01</version>
+        <version>wxd-j17-01</version>
     </parent>
 
     <artifactId>org.wxd.boot.assist</artifactId>
@@ -20,7 +20,7 @@
     </dependencies>
 
     <build>
-        <finalName>wxd-j21-assist</finalName>
+        <finalName>wxd-j17-assist</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
